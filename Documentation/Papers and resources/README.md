@@ -2,6 +2,7 @@
 
 Waveguides: https://www.rp-photonics.com/waveguides.html 
 Second-harmonic generation: 
-    - https://en.wikipedia.org/wiki/Second-harmonic_generation 
-    - https://www.sciencedirect.com/topics/chemistry/second-harmonic-generation 
+    - Wikipedia page: https://en.wikipedia.org/wiki/Second-harmonic_generation 
+    - Topic paper collection: https://www.sciencedirect.com/topics/chemistry/second-harmonic-generation 
+    - Frequency Doubling by Photonic Encyclopedia: https://www.rp-photonics.com/frequency_doubling.html
 
