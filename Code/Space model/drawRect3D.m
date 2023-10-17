@@ -1,10 +1,20 @@
 % Function to draw a 3D rectangle
 % TODO: make this into studied struct
 
-function drawRect3D(position, dimensions, color)
-    x = [0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0] * dimensions(1) + position(1);
-    y = [0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1] * dimensions(2) + position(2);
-    z = [0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 1] * dimensions(3) + position(3);
-    
-    patch(x, y, z, color);
+
+function draw3DRectangle(position, dimensions, color)
+    % Define the vertices of the rectangle
+    x = dimensions(1);
+    y = dimensions(2);
+    z = dimensions(3);
+
+    x0 = position(1);
+
+    x0plus = x0 + x/2;
+    x0minus = x0 - x/2;
+
+    vert = [x0minus 0 0;] 
+    fac = [1 6 2]
+
+    patch =  ('Vertices',vert,'Faces',fac)   
 end

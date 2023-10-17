@@ -1,11 +1,11 @@
 % Rail positions and dimensions ----------------------
 % currently modelled and rectangles - TODO: dev
-rail_dimensions = [10, 1, 1]; % [length, width, height] - 3D space
+rail1_dimensions = [0.5, 1, 10]; % [length, width, height] - 3D space
 rail2_dimensions = rail1_dimensions;
 
 
-rail1_position = [0];
-rail2_position = [2];
+rail1_position = [0,0,0];
+rail2_position = [0,0,2];
 
 
 %Figure ----------------------------------------------
@@ -27,7 +27,7 @@ zlabel('Z-axis');
 title('3D Dual Rail Setup');
 
 % Set axis limits if needed
-% axis([-5, 5, -5, 5, 0, 2]);
+axis([-1, 3, 0, 5, 0, 2]);
 
 % Turn off hold to prevent further additions to the plot
 hold off;
