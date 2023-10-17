@@ -1,4 +1,4 @@
-%Second harmnic simulation of WMS using Schilt's mathematic derivation
+%Second harmonic simulation of WMS using Schilt's mathematic derivation
 
 x = -10:0.01:10; %normalized frequency x = (v-vline)/dvline
 dv = 2.2; %laser frequency deviation
