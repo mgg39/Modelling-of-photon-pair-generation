@@ -13,8 +13,8 @@ function draw3DRectangle(position, dimensions, color)
     x0plus = x0 + x/2;
     x0minus = x0 - x/2;
 
-    vert = [x0minus 0 0;] 
-    fac = [1 6 2]
+    vert = ;%TODO - I need to better understand how patch works
+    fac = ;%TODO
 
     patch =  ('Vertices',vert,'Faces',fac)   
 end
