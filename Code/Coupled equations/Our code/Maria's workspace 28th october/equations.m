@@ -25,8 +25,8 @@ t = [0,1];
 % PROPAGATION
 % Propagation constant
 % UNSURE: leaving it as 1 for now -> ideal fully conserved momentum scenario
-beta_one[0,1,2] = [placeholder,placeholder,placeholder];
-beta_two[0,1,2] = [placeholder,NaN,NaN];  % UNSURE = nxt step?
+beta_one = [placeholder, placeholder, placeholder];
+beta_two = [placeholder, NaN, NaN];  % UNSURE = nxt step?
 
 % Walk off length
 %TODO : check t0 definition
@@ -39,7 +39,7 @@ y_p = t(0)/(beta_one(3) - beta_one(1));
 s_one = y_distance/y_s; %s1
 p_one = y_distance/y_p; %s2
 
-m_one = [0,1,2] = [NaN,s_one,p_one];
+m_one = [NaN, s_one, p_one];
 
 % Propagation relations
 %TODO : make sure beta_f = beta_f_2 in the equations -> otherwise change
@@ -47,7 +47,7 @@ r_two = -beta_f/abs(beta_f_2);
 s_two = -beta_s/abs(beta_f_2);
 p_two = -beta_p/abs(beta_f_2);
 
-m_two = [0,1,2] = [r_two,s_two,p_two];
+m_two = [r_two, s_two, p_two];
 
 % COUPLING CONSTANT
 % UNSURE: leaving it as 1 for now -> ideal fully conserved momentum scenario
