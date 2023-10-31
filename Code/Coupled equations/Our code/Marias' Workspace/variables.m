@@ -2,7 +2,7 @@
 
 % ALL CONSTANTS ---------------------------------------------------
 
-kappa=0.1; % Taken From Andriy's Code, probably worth TEST
+kappa=0.1; % worth TEST
 emax = 50; % TFAC -> max e: TEST
 xini=[2,0]; % TFAC UNSURE what this is? -> may be n equation?
 
