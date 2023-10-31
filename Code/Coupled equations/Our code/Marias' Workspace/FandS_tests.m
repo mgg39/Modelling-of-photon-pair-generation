@@ -4,7 +4,7 @@ clc
 gamma=1;
 kappa=0.1;
 
-xini=[1,0, 0]; %add t
+xini=[1,0]; %F %S
 
 options = odeset('RelTol',1e-8,'AbsTol',1e-10);
 
