@@ -3,7 +3,7 @@ clear all
 clc
 
 % Set values for gamma and kappa
-gamma = 1;
+gamma = 1; %associated to dispersion relation
 kappa = 0.1;
 
 % Initial condition for the differential equation
