@@ -1,8 +1,8 @@
-clear all
+clear all  
 clc
 
 gamma=100;
-kappa=6.9*10^5;
+kappa=6.9e5;
 C = 200;
 
 xini=[1,0,0];
@@ -15,6 +15,8 @@ zmax=50;
 
 figure
 plot(z,abs(x).^2)
+xlim([0 50])
+ylim([0 1])
 legend('F','S','P')
 
 %%
