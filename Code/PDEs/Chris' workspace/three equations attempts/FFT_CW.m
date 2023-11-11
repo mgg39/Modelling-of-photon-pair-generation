@@ -32,14 +32,14 @@ delta = fftshift(delta); % re-order          % these are frequency detunings del
 
 %% Initial conditions
 
-u0=zeros(N,3);
-for i=N
-    u0(i, 3)=sech(t(i));
+u0=zeros(N,2);
+for i=1:N
+    u0(i, 1)=sech(t(i));
 end
 
 %% Fourier Frequency domain
 x = 0:0.1:20; % Replacing x
-[x, uhat] = ode45(@(x, uhat) rhspde_AG(x, uhat, delta, Beta_f1,Beta_f2, kappa, Beta_s1, Beta_p1, gamma, C), x, fft(u0));
+[x, uhat] = ode45(@(x, uhat) rhspde_AG(x, uhat, delta, Beta_f1,Beta_f2, kappa, Beta_s1, Beta_p1, gamma, C), x, u0);
 
 u=ifft(uhat,N,2);
 
