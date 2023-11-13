@@ -32,16 +32,17 @@ delta = fftshift(delta); % re-order          % these are frequency detunings del
 
 %% Initial conditions
 
-u0=zeros(N,2);
+u0=zeros(N,3); %Defining a matrix to represent all pulses together%%
 for i=1:N
-    u0(i, 1)=sech(t(i));
+    u0(i, 1)=sech(t(i));  %Sech represents laser pulses very well
 end
+%Other pulse/s remain at 0 for initial conditions
 
 %% Fourier Frequency domain
 x = 0:0.1:20; % Replacing x
 [x, uhat] = ode45(@(x, uhat) rhspde_AG(x, uhat, delta, Beta_f1,Beta_f2, kappa, Beta_s1, Beta_p1, gamma, C), x, u0);
 
-u=ifft(uhat,N,2);
+u=ifft(uhat,N,2); %Returning to spacial and temporal domains
 
 %% Plot
 figure;
