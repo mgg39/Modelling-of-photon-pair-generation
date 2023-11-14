@@ -134,12 +134,18 @@ ylabel('Energy')
 
 %%%%%%%%%%%%%%%%%%PLOTS%%%%%%%%%%%%%%%%%%%%%%%%
 
+% r2
+Beta_2 = (0.83)*(10.^(-24));
+Beta_1 = (563.3)*(10.^(-12));
+a = (-Beta_2 / 2) / 1i;
+b = (-Beta_1 / 2) / 1i;
 
 function  y= rhs(z,x,N)
 
- p=-1i*x(N+1:2*N).*x(2*N+1:3*N);
- a1=-1i*x(1:N).*conj(x(2*N+1:3*N));
- a2=-1i*x(1:N).*conj(x(N+1:2*N));
+ p=-Beta_1*x(N+1:2*N);
+ #TODO - rework there
+ a1=;
+ a2=-;
 
  y=vertcat(p,a1,a2);
 
