@@ -6,8 +6,8 @@ dt = L / N; % Changing dx to dt
 t = -L / 2:dt:L / 2 - dt; % time domain
 
 % r2
-Beta_2 = 0.83;
-Beta_1 = 563.3;
+Beta_2 = (0.83)*(10.^(-24));
+Beta_1 = (563.3)*(10.^(-12));
 a = (-Beta_2 / 2) / 1i;
 b = (-Beta_1 / 2) / 1i;
 
