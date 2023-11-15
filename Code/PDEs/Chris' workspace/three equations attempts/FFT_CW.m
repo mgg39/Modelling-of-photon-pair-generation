@@ -3,12 +3,15 @@
 clear all, close all, clc
 
 L = 100; % length domain
-N = 1000; % n discretization points
+N = 1024; % n discretization points
 dt = L / N; % Changing dx to dt
 t = -L / 2:dt:L / 2 - dt; % time domain
 
 t=t';   % AG: make it a column vector,
         % instead of row vector (ODE45 requires column vectors)
+
+delta = (2 * pi / L) * [-N / 2:N / 2 - 1]';
+delta = fftshift(delta);
 
 % r2
 Beta_f2 = 0.83e-6;
@@ -17,7 +20,6 @@ Beta_f1 = -563.3e-3;
 %b = (Beta_1);        %  it is easier and clearer to use Beta_1 and Beta_2
                       % I updated the rhspde_AG accordingly
 Beta_s1 = 533.3e-3;
-Beta_p1 = 1e-3;
 
 kappa = 6.9e5;
 gamma = 100;
@@ -32,15 +34,15 @@ delta = fftshift(delta); % re-order          % these are frequency detunings del
 
 %% Initial conditions
 
-u0=zeros(N,3); %Defining a matrix to represent all pulses together%%
-for i=1:N
-    u0(i, 1)=sech(t(i));  %Sech represents laser pulses very well
+u0=zeros(3*N, 1); %Defining a matrix to represent all pulses together%%
+for c=1:N
+    u0(c, 1)=sech(t(c));  %Sech represents laser pulses very well
 end
 %Other pulse/s remain at 0 for initial conditions
 
 %% Fourier Frequency domain
-x = 0:0.1:20; % Replacing x
-[x, uhat] = ode45(@(x, uhat) rhspde_AG(x, uhat, delta, Beta_f1,Beta_f2, kappa, Beta_s1, Beta_p1, gamma, C), x, u0);
+x = [0:20/(N-1):20]'; % Replacing x
+[x, uhat] = ode45(@(x, uhat) rhspde_CW(x, uhat, delta, Beta_f1,Beta_f2, kappa, Beta_s1, gamma, C, N, delta), x, fft(u0));
 
 u=ifft(uhat,N,2); %Returning to spacial and temporal domains
 
