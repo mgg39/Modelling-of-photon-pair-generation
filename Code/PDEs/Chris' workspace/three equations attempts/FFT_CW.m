@@ -32,6 +32,8 @@ delta = fftshift(delta); % re-order          % these are frequency detunings del
                                             % (central frequency of the
                                             % pump pulse)
 
+count = 0;
+
 %% Initial conditions
 
 u0=zeros(3*N, 1); %Defining a matrix to represent all pulses together%%
@@ -42,7 +44,7 @@ end
 
 %% Fourier Frequency domain
 x = [0:20/(N-1):20]'; % Replacing x
-[x, uhat] = ode45(@(x, uhat) rhspde_CW(x, uhat, delta, Beta_f1,Beta_f2, kappa, Beta_s1, gamma, C, N, delta), x, fft(u0));
+[x, uhat] = ode45(@(x, uhat) rhspde_CW(x, uhat, Beta_f1,Beta_f2, kappa, Beta_s1, gamma, C, N, delta, count), x, u0);
 
 u=ifft(uhat,N,2); %Returning to spacial and temporal domains
 
