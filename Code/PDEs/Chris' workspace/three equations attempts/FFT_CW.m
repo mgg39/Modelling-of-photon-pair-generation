@@ -32,8 +32,6 @@ delta = fftshift(delta); % re-order          % these are frequency detunings del
                                             % (central frequency of the
                                             % pump pulse)
 
-count = 0;
-
 %% Initial conditions
 
 u0=zeros(3*N, 1); %Defining a matrix to represent all pulses together%%
@@ -42,11 +40,19 @@ for c=1:N
 end
 %Other pulse/s remain at 0 for initial conditions
 
+opts = odeset('RelTol',1e-2,'AbsTol',1e-4);
+
 %% Fourier Frequency domain
 x = [0:20/(N-1):20]'; % Replacing x
-[x, uhat] = ode45(@(x, uhat) rhspde_CW(x, uhat, Beta_f1,Beta_f2, kappa, Beta_s1, gamma, C, N, delta, count), x, u0);
+[x, uhat] = ode45(@(x, uhat) rhspde_CW(x, t, uhat, Beta_f1,Beta_f2, kappa, Beta_s1, gamma, C, N, delta), x, u0, opts);
 
-u=ifft(uhat,N,2); %Returning to spacial and temporal domains
+u1 = uhat(:,1:N);
+u2 = uhat(:,N+1:2*N);
+u3 = uhat(:,2*N+1:3*N);
+
+u1=ifft(u1,N,2); %Returning to spacial and temporal domains
+u2=ifft(u2,N,2);
+u3=ifft(u3,N,2);
 
 %% Plot
 figure;
@@ -110,7 +116,7 @@ title('Real and Imaginary Parts of u(t)');
 %ylabel('(|u|^2)');
 %title('|u|^2(t)');
 
-pcolor(t,x,abs(u).^2)
+pcolor(t,x,abs(u1).^2)
 shading interp
 xlabel('t(ns)')
 ylabel('x(m)')
