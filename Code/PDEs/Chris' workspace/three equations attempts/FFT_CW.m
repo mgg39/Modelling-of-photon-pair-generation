@@ -36,7 +36,7 @@ delta = fftshift(delta); % re-order          % these are frequency detunings del
 
 u0=zeros(3*N, 1); %Defining a matrix to represent all pulses together%%
 for c=1:N
-    u0(c, 1)=sech(t(c));  %Sech represents laser pulses very well
+    u0(c, 1)=(sech(t(c)) + 1i*sech(t(c)))/sqrt(2);  %Sech represents laser pulses very well
 end
 %Other pulse/s remain at 0 for initial conditions
 
@@ -44,7 +44,7 @@ opts = odeset('RelTol',1e-2,'AbsTol',1e-4);
 
 %% Fourier Frequency domain
 x = [0:20/(N-1):20]'; % Replacing x
-[x, uhat] = ode45(@(x, uhat) rhspde_CW(x, t, uhat, Beta_f1,Beta_f2, kappa, Beta_s1, gamma, C, N, delta), x, u0, opts);
+[x, uhat] = ode45(@(x, uhat) rhspde_CW(t,x,uhat, Beta_f1,Beta_f2, kappa, Beta_s1, gamma, C, N, delta), x, u0, opts);
 
 u1 = uhat(:,1:N);
 u2 = uhat(:,N+1:2*N);
@@ -116,7 +116,26 @@ title('Real and Imaginary Parts of u(t)');
 %ylabel('(|u|^2)');
 %title('|u|^2(t)');
 
+subplot(3,1,1)
 pcolor(t,x,abs(u1).^2)
 shading interp
 xlabel('t(ns)')
 ylabel('x(m)')
+title("F")
+colorbar
+subplot(3,1,2)
+pcolor(t,x,abs(u2).^2)
+shading interp
+xlabel("t(ns)")
+ylabel("x(m)")
+title("S")
+colorbar
+subplot(3,1,3)
+pcolor(t,x,abs(u3).^2)
+shading interp
+xlabel("t(ns)")
+ylabel("x(m)")
+title("P")
+colorbar
+
+%ylim([0 1])
