@@ -1,5 +1,3 @@
-% https://www.youtube.com/watch?v=BkA7ncY0b7I
-
 clear all, close all, clc
 
 L = 100; % length domain
