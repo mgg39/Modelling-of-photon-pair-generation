@@ -63,46 +63,16 @@ u1 = uhat(:,1:N);       %Breaking apart final matrix into 3 respective pulses
 u2 = uhat(:,N+1:2*N);
 u3 = uhat(:,2*N+1:3*N);
 
+%%%%% Dispersion 
 
-%% Plot
+% Dispersion relation (assuming linear dispersion for simplicity)
+k = linspace(-pi/dt, pi/dt, N);  % Wavenumber range
+
+omega = sqrt(Beta_f1 + Beta_f2 * k.^2) + sqrt(Beta_s1 + Beta_s2 * k.^2) + sqrt(Beta_p2 * k.^2); % Frequency
+
+% Plot the dispersion curve
 figure;
-
-subplot(1,3,1)         %Plotting F pulse
-pcolor(t,z,abs(u1).^2)
-shading interp
-xlabel('t(ps)')
-ylabel('x(cm)')
-colorbar
-ylabel(colorbar, "Pulse energy (kW)","fontsize",10,"rotation",270)
-title("F")
-set(gca,'TickDir','out'); 
-
-subplot(1,3,2)         %Plotting S pulse
-pcolor(t,z,abs(u2).^2)
-shading interp
-xlabel('t(ps)')
-ylabel('x(cm)')
-colorbar
-ylabel(colorbar, "Pulse energy (kW)","fontsize",10,"rotation",270)
-title("S")
-set(gca,'TickDir','out'); 
-
-subplot(1,3,3)          %Plotting P pulse
-pcolor(t,z,abs(u3).^2)
-shading interp
-xlabel('t(ps)')
-ylabel('x(cm)')
-colorbar
-ylabel(colorbar, "Pulse energy (kW)","fontsize",10,"rotation",270)
-title("P")
-set(gca,'TickDir','out'); 
-
-%% Peak finder
-
-[P,Idx] = max(abs(u3(:)).^2);
-[PmaxRow,PmaxCol] = ind2sub(size(abs(u3).^2), Idx);
-Z = z(PmaxRow);
-T = t(PmaxCol);
-P = P*sqrt(A);
-
-fprintf("For an input laser of power %.2f kW and pulsewidth %.1d ps, the Pump pulse has a maximum amplitude of %.2d kW at z = %.2d cm and t = %.1d ps", A, pulsewidth, P, Z, T)
+plot(k, omega*100);
+xlabel('Wavenumber (k)');
+ylabel('Frequency e-2');
+title('Dispersion Curve');

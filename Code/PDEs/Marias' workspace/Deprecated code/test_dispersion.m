@@ -1,10 +1,12 @@
-clear all; close all; 
+% Generating a Pulse with Multiple Frequencies to observe dispersion:
+
+clear all; close all;
 clc;
 
 L = 100; % length domain
 N = 1024; % N discretization points
 dt = L / N; 
-t = [-L / 2:dt:L / 2 - dt]'; % time domain in ps (ps determined by constants)
+t = [-L / 2:dt:L / 2 - dt]'; % time domain in ps (determined by discretization points N)
 
 delta = (2 * pi / L) * [-N / 2:N / 2 - 1]';  %Inverse space domain
 delta = fftshift(delta);
@@ -22,22 +24,22 @@ C = 2; %Units in  1/cm
 
 %% Initial conditions
 
-u0=zeros(3*N, 1); %Defining an array to represent all pulses together
-                  %F pulse represented by first N points, S represented by
-                  %N+1 to 2N point, P represented by 2N+1 to 3N points
+u0 = zeros(3 * N, 1); % Defining an array to represent all pulses together
+                      % F pulse represented by first N points, S represented by
+                      % N+1 to 2N point, P represented by 2N+1 to 3N points
 
-pulsewidth = 3;  %Pulse width of laser (timeframe already scale to ps with co-efficients)
-A = 1.1; %Amplitude of laser pulse in kiloWatts 
-ratio = 2*asech(1/2)/pulsewidth; %Finding the ratio between the desired pulsewidth and FWHM of a sech curve to scale t by
+pulsewidth = 3;  % Pulse width of laser (timeframe already scaled to ps with coefficients)
+A = 1.1; % Amplitude of laser pulse in kiloWatts 
+ratio = 2 * asech(1/2) / pulsewidth; % Finding the ratio between the desired pulsewidth and FWHM of a sech curve to scale t by
 
-for c=1:N
-    u0(c)=sqrt(A)*sech(t(c)*ratio)*(1+1i)/sqrt(2);  %Sech represents laser pulses very well
-    %Actual height of sech curve is A^2 (due to abs(u3).^2) so is scaled by sqrt(A)
-end 
+central_freqs = [1e12, 2e12, 3e12]; % Set your desired central frequencies
 
-%Other pulses remain at 0 for initial conditions
+% Combining multiple frequency components through superposition of different sech pulses with varying central frequencies
+for i = 1:length(central_freqs)
+    u0 = u0 + (sqrt(A) * sech((t - i * pulsewidth) * ratio)) .* (exp(1i * 2 * pi * central_freqs(i) * t) / sqrt(2));
+end
 
-opts = odeset('RelTol',1e-2,'AbsTol',1e-4);
+opts = odeset('RelTol', 1e-2, 'AbsTol', 1e-4);
  
 %% Damage threshold
 
