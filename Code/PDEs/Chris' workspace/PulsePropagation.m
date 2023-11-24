@@ -26,9 +26,9 @@ u0=zeros(3*N, 1); %Defining an array to represent all pulses together
                   %F pulse represented by first N points, S represented by
                   %N+1 to 2N point, P represented by 2N+1 to 3N points
 
-pulsewidth = 3;                    %Pulse width of laser (timeframe already scale to ps with co-efficients)
-A = 1.1;                              %Amplitude of laser pulse in kiloWatts 
-ratio = 2*asech(1/2)/pulsewidth;     %Finding the ratio between the desired pulsewidth and FWHM of a sech curve to scale t by
+pulsewidth = 3;  %Pulse width of laser (timeframe already scale to ps with co-efficients)
+A = 1.1; %Amplitude of laser pulse in kiloWatts 
+ratio = 2*asech(1/2)/pulsewidth; %Finding the ratio between the desired pulsewidth and FWHM of a sech curve to scale t by
 
 for c=1:N
     u0(c)=sqrt(A)*sech(t(c)*ratio)*(1+1i)/sqrt(2);  %Sech represents laser pulses very well
