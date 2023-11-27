@@ -10,15 +10,15 @@ delta = (2 * pi / L) * [-N / 2:N / 2 - 1]';  %Inverse space domain
 delta = fftshift(delta);
 
 % Constants
-Beta_f2 = -0.83e-12; %Units in ps^2/cm
-Beta_s2 = 0.22e-12; %Units in ps^2/cm
-Beta_p2 = -2.53e-12; %Units in ps^2/cm
-Beta_f1 = 563.3e-6; %Units in ps/cm
-Beta_s1 = 533.3e-6; %Units in ps/cm
+Beta_f2 = -0.83e-2; %Units in ps^2/cm
+Beta_s2 = 0.22e-2; %Units in ps^2/cm
+Beta_p2 = -2.53e-2; %Units in ps^2/cm
+Beta_f1 = 563.3e-2; %Units in ps/cm
+Beta_s1 = 533.3e-2; %Units in ps/cm
 kappa = -6.9e3; %Units in 1/cm
 gamma = 1*10^1.5; %Units in 1/(cm*sqrt(kW))
 
-C = 2; %Units in  1/cm
+C = 2; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
 
 %% Initial conditions
 
@@ -26,9 +26,9 @@ u0=zeros(3*N, 1); %Defining an array to represent all pulses together
                   %F pulse represented by first N points, S represented by
                   %N+1 to 2N point, P represented by 2N+1 to 3N points
 
-pulsewidth = 3;  %Pulse width of laser (timeframe already scale to ps with co-efficients)
-A = 1.1; %Amplitude of laser pulse in kiloWatts 
-ratio = 2*asech(1/2)/pulsewidth; %Finding the ratio between the desired pulsewidth and FWHM of a sech curve to scale t by
+pulsewidth = 5;                    %Pulse width of laser (timeframe already scale to ps with constants)
+A = 1.1;                              %Amplitude of laser pulse in kiloWatts (kW scaled by constants)
+ratio = 2*asech(1/2)/pulsewidth;     %Finding the ratio between the desired pulsewidth and FWHM of a sech curve to scale t by
 
 for c=1:N
     u0(c)=sqrt(A)*sech(t(c)*ratio)*(1+1i)/sqrt(2);  %Sech represents laser pulses very well
@@ -48,8 +48,14 @@ theta = 70;    %Slant of waveguide wall in degrees
 
 face = w*h + h^2/tan(theta); %Area of waveguide face in cm^2
 
+max_PW = D_T*face/A;           %Maximum allowed pulsewidth for selected pulse strength without damaging crystal
+max_PA = D_T*face/pulsewidth;  %Maximum allowed pulse strength for selected pulsewidth without damaging crystal
+max_PW = max_PW*10^12; %Converting max_PW to ps
+max_PA = max_PA*10^12; %Converting max_PA to kW
+
 if ((A*pulsewidth*10^-12/face) > D_T)
     fprintf("The input laser has exceeded the damage threshold of Lithium Niobate \n")
+    fprintf("Try changing the pulsewidth to be less than %.3f ps or the pulse strength to be less than %.3f kW \n", max_PW, max_PA)
     stop
 end
 
