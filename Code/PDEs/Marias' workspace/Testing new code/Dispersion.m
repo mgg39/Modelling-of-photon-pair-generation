@@ -73,6 +73,6 @@ omega = sqrt(Beta_f1 + Beta_f2 * k.^2) + sqrt(Beta_s1 + Beta_s2 * k.^2) + sqrt(B
 % Plot the dispersion curve
 figure;
 plot(k, omega*100);
-xlabel('Wavenumber (k)');
-ylabel('Frequency e-2');
+xlabel('Wavenumber');
+ylabel('Angular Frequency e-2');
 title('Dispersion Curve');
