@@ -72,11 +72,13 @@ u3 = uhat(:,2*N+1:3*N);
 % Dispersion relation (assuming linear dispersion for simplicity)
 k = linspace(-pi/dt, pi/dt, N);  % Wavenumber range
 
-omega = sqrt(Beta_f1 + Beta_f2 * k.^2) + sqrt(Beta_s1 + Beta_s2 * k.^2) + sqrt(Beta_p2 * k.^2); % Frequency
+omega = sqrt(Beta_f1 + Beta_f2 * k.^2) + sqrt(Beta_s1 + Beta_s2 * k.^2) + sqrt(Beta_p2 * k.^2); 
+
 
 % Plot the dispersion curve
 figure;
-plot(k, omega*100);
+plot(k, omega);
 xlabel('Wavenumber');
-ylabel('Angular Frequency e-2');
+ylabel('Real component Angular frequency ');
 title('Dispersion Curve');
+
