@@ -11,7 +11,7 @@ fu3 = fft(u3);
 
 duhatdt1 = ifft( (-1i*bf2/2*delta.^2.*fu1.*1) + (1i*bf1*delta.*fu1.*1) + (gamma*fft(conj(u1).*u2.*exp(1i*z.*kappa).*1)) ); %linear and diagonal
 duhatdt2 = ifft( (-1i*bs2/2*delta.^2.*fu2.*1) + (-1i*bs1*delta.*fu2.*1) + (1i*fu3.*C) + (gamma*fft(u1.^2)*exp(-1i*z.*kappa)./2) );% + (1i*u2.*kappa) );
-duhatdt3 = ifft( (-1i*bp2/2*delta.^2.*fu3.*1) + (1i*bs1*delta.*fu3.*1) + (1i*fu2.*C) );% + (1i*u3.*kappa) );
+duhatdt3 = ifft( (-1i*bp2/2*delta.^2.*fu3.*1) + (1i*fu2.*C) );% + (1i*u3.*kappa) );
 
 duhatdt = [duhatdt1' duhatdt2' duhatdt3']';  %Recombining pulses into one array
 end
