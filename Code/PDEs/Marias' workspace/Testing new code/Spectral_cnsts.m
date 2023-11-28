@@ -72,26 +72,3 @@ spectral_constant_F = sum(abs(fftshift(fft(u1)))/N).^2;
 spectral_constant_S = sum(abs(fftshift(fft(u2)))/N).^2;
 spectral_constant_P = sum(abs(fftshift(fft(u3)))/N).^2;
 
-%% Plot
-figure;
-
-subplot(1,3,1)         %Plotting F pulse spectral constant
-plot(delta, spectral_constant_F)
-xlabel('Frequency')
-ylabel('Spectral Constant')
-title("F")
-set(gca,'TickDir','out'); 
-
-subplot(1,3,2)         %Plotting S pulse spectral constant
-plot(delta, spectral_constant_S)
-xlabel('Frequency')
-ylabel('Spectral Constant')
-title("S")
-set(gca,'TickDir','out'); 
-
-subplot(1,3,3)          %Plotting P pulse spectral constant
-plot(delta, spectral_constant_P)
-xlabel('Frequency')
-ylabel('Spectral Constant')
-title("P")
-set(gca,'TickDir','out'); 

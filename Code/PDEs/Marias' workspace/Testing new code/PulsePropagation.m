@@ -106,3 +106,15 @@ T = t(PmaxCol);
 P = P*sqrt(A);
 
 fprintf("For an input laser of power %.2f kW and pulsewidth %.1d ps, the Pump pulse has a maximum amplitude of %.2d kW at z = %.2d cm and t = %.1d ps", A, pulsewidth, P, Z, T)
+
+figure;
+
+% Plotting P pulse in the z vs t plane
+pcolor(t, z, abs(u3).^2)
+shading interp
+xlabel('t (ps)')
+ylabel('z (cm)')
+colorbar
+ylabel(colorbar, 'Pulse energy (kW)', 'fontsize', 10, 'rotation', 270)
+title('Pulse Intensity in the z vs t Plane')
+set(gca, 'TickDir', 'out');
