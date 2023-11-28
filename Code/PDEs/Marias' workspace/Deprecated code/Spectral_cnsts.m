@@ -34,7 +34,6 @@ for c=1:N
     u0(c)=sqrt(A)*sech(t(c)*ratio)*(1+1i)/sqrt(2);  %Sech represents laser pulses very well
     %Actual height of sech curve is A^2 (due to abs(u3).^2) so is scaled by sqrt(A)
 end 
-
 %Other pulses remain at 0 for initial conditions
 
 opts = odeset('RelTol',1e-2,'AbsTol',1e-4);
@@ -63,46 +62,32 @@ u1 = uhat(:,1:N);       %Breaking apart final matrix into 3 respective pulses
 u2 = uhat(:,N+1:2*N);
 u3 = uhat(:,2*N+1:3*N);
 
+%% Calculate spectral content
+
+spectral_constant_F = sum(abs(fftshift(fft(u1)))/N).^2;
+spectral_constant_S = sum(abs(fftshift(fft(u2)))/N).^2;
+spectral_constant_P = sum(abs(fftshift(fft(u3)))/N).^2;
 
 %% Plot
 figure;
 
-subplot(1,3,1)         %Plotting F pulse
-pcolor(t,z,abs(u1).^2)
-shading interp
-xlabel('t(ps)')
-ylabel('x(cm)')
-colorbar
-ylabel(colorbar, "Pulse energy (kW)","fontsize",10,"rotation",270)
+subplot(1,3,1)         %Plotting F pulse spectral constant
+plot(delta, spectral_constant_F)
+xlabel('Frequency')
+ylabel('Spectral Constant')
 title("F")
 set(gca,'TickDir','out'); 
 
-subplot(1,3,2)         %Plotting S pulse
-pcolor(t,z,abs(u2).^2)
-shading interp
-xlabel('t(ps)')
-ylabel('x(cm)')
-colorbar
-ylabel(colorbar, "Pulse energy (kW)","fontsize",10,"rotation",270)
+subplot(1,3,2)         %Plotting S pulse spectral constant
+plot(delta, spectral_constant_S)
+xlabel('Frequency')
+ylabel('Spectral Constant')
 title("S")
 set(gca,'TickDir','out'); 
 
-subplot(1,3,3)          %Plotting P pulse
-pcolor(t,z,abs(u3).^2)
-shading interp
-xlabel('t(ps)')
-ylabel('x(cm)')
-colorbar
-ylabel(colorbar, "Pulse energy (kW)","fontsize",10,"rotation",270)
+subplot(1,3,3)          %Plotting P pulse spectral constant
+plot(delta, spectral_constant_P)
+xlabel('Frequency')
+ylabel('Spectral Constant')
 title("P")
 set(gca,'TickDir','out'); 
-
-%% Peak finder
-
-[P,Idx] = max(abs(u3(:)).^2);
-[PmaxRow,PmaxCol] = ind2sub(size(abs(u3).^2), Idx);
-Z = z(PmaxRow);
-T = t(PmaxCol);
-P = P*sqrt(A);
-
-fprintf("For an input laser of power %.2f kW and pulsewidth %.1d ps, the Pump pulse has a maximum amplitude of %.2d kW at z = %.2d cm and t = %.1d ps", A, pulsewidth, P, Z, T)
