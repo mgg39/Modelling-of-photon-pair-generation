@@ -1,24 +1,24 @@
 clear all, close all 
 clc
 
-T = 50; % time domain width
+T = 20; % time domain width
 N = 1024; % N discretization points
 dt = T / N; 
-t = [-T / 2:dt:T / 2 - dt]'; % time domain in ps (ps determined by constants)
+t = [-T/4 : dt : 3*T/4 - dt]'; % time domain in ps (ps determined by constants)
 
 delta = (2 * pi / T) * [-N / 2:N / 2 - 1]';  %Inverse space domain
 delta = fftshift(delta);
 
 % Constants
-Beta_f2 = -0.83e-2; %Units in ps^2/cm
+Beta_f2 = 0.83e-2; %Units in ps^2/cm
 Beta_s2 = 0.22e-2; %Units in ps^2/cm
-Beta_p2 = -2.53e-2; %Units in ps^2/cm
+Beta_p2 = 2.53e-2; %Units in ps^2/cm
 Beta_f1 = 563.3e-2; %Units in ps/cm
 Beta_s1 = 533.3e-2; %Units in ps/cm
-kappa = -6.9e3; %Units in 1/cm
+kappa =  6.9e3; %Units in 1/cm
 gamma = 1*10^1.5; %Units in 1/(cm*sqrt(kW))
 
-C = 2; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
+C = 1; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
 
 %% Initial conditions
 
@@ -59,7 +59,7 @@ if ((A*pulsewidth*10^-12/face) > D_T)
 end
 
 %% Fourier Frequency domain
-zend = 1.5;
+zend = 5*T/(8*Beta_f1);
 z = [0:zend/(N-1):zend]'; % Spacial domain in cm (cm determined by contsants)
 
 [z, uhat] = ode45(@(z, uhat) CoupledPDEs(z,uhat,N,delta,Beta_f1,Beta_f2,Beta_s1,Beta_s2,Beta_p2,kappa,gamma,C), z, u0, opts);
@@ -67,7 +67,6 @@ z = [0:zend/(N-1):zend]'; % Spacial domain in cm (cm determined by contsants)
 u1 = uhat(:,1:N);       %Breaking apart final matrix into 3 respective pulses
 u2 = uhat(:,N+1:2*N);
 u3 = uhat(:,2*N+1:3*N);
-
 
 %% Plot
 figure;
@@ -146,16 +145,15 @@ ylabel('Energy')
 title('Ez vs z')
 set(gca,'TickDir','out'); 
 
-
+%{
 %% Plot v2
 figure;
 
-%{
 plot(z, Ef, 'r', 'LineWidth', 2, 'DisplayName', 'Ef');
 hold on;
 plot(z, Es, 'g', 'LineWidth', 2, 'DisplayName', 'Es');
 plot(z, Ez, 'b', 'LineWidth', 2, 'DisplayName', 'Ez');
-%}
+
 
 xlabel('z (cm)')
 ylabel('Energy')
@@ -185,6 +183,4 @@ set(gca,'TickDir','out');
 axis([min(z), max(z), min([Ef; Es; Ez]), max([Ef; Es; Ez])]);
 
 hold off;
-
-
-
+%}
