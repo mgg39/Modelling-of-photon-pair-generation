@@ -49,13 +49,10 @@ theta = 70;    %Slant of waveguide wall in degrees
 
 face = w*h + h^2/tan(theta); %Area of waveguide face in cm^2
 
-%Integral of a*sech(b*x) from -ininifty to infinity= a*pi/b
-E = sqrt(A)*pi/(ratio*10^12);
+max_PW = D_T*face*10^12/A;           %Maximum allowed pulsewidth for selected pulse strength without damaging crystal
+max_PA = D_T*face*10^12/pulsewidth;  %Maximum allowed pulse strength for selected pulsewidth without damaging crystal
 
-max_PW = 2*asech(1/2)*D_T*face/(pi*sqrt(A)*10^-12);           %Maximum allowed pulsewidth for selected pulse strength without damaging crystal
-max_PA = (D_T*face*ratio*10^12/pi)^2;  %Maximum allowed pulse strength for selected pulsewidth without damaging crystal
-
-if ((E/face) > D_T)
+if ((A*pulsewidth*10^-12/face) > D_T)
     fprintf("The input laser has exceeded the damage threshold of Lithium Niobate \n")
     fprintf("Try changing the pulsewidth to be less than %.3f ps or the pulse strength to be less than %.3f kW \n", max_PW, max_PA)
     stop
@@ -73,7 +70,7 @@ u3 = uhat(:,2*N+1:3*N);
 
 
 %% Plot
-figure;
+figure; %%3 plots
 
 subplot(1,3,1)         %Plotting F pulse
 pcolor(t,z,abs(u1).^2)
@@ -81,10 +78,10 @@ shading interp
 hold on
 %plot(Beta_f1*z, z)
 hold off
-xlabel('t (ps)')
-ylabel('z (cm)')
+xlabel('t(ps)')
+ylabel('x(cm)')
 colorbar
-ylabel(colorbar, "Pulse power (kW)","fontsize",10,"rotation",270)
+ylabel(colorbar, "Pulse energy (kW)","fontsize",10,"rotation",270)
 title("F")
 set(gca,'TickDir','out'); 
 
@@ -94,10 +91,10 @@ shading interp
 hold on
 %plot(Beta_s1*z, z, color='w')
 hold off
-xlabel('t (ps)')
-ylabel('z (cm)')
+xlabel('t(ps)')
+ylabel('x(cm)')
 colorbar
-ylabel(colorbar, "Pulse power (kW)","fontsize",10,"rotation",270)
+ylabel(colorbar, "Pulse energy (kW)","fontsize",10,"rotation",270)
 title("S")
 set(gca,'TickDir','out'); 
 
@@ -107,57 +104,10 @@ shading interp
 hold on
 %plot(Beta_s1*z, z, color='w')
 hold off
-xlabel('t (ps)')
-ylabel('z (cm)')
+xlabel('t(ps)')
+ylabel('x(cm)')
 colorbar
-ylabel(colorbar, "Pulse power (kW)","fontsize",10,"rotation",270)
+ylabel(colorbar, "Pulse energy (kW)","fontsize",10,"rotation",270)
 title("P")
-set(gca,'TickDir','out'); 
-
-%% Peak finder
-
-[Pmax,Idx] = max(abs(u3(:)).^2);
-[PmaxRow,PmaxCol] = ind2sub(size(abs(u3).^2), Idx);
-Zmax = z(PmaxRow);
-Tmax = t(PmaxCol);
-
-fprintf("For an input laser of power %.2f kW and pulsewidth %.1d ps, the Pump pulse has a maximum amplitude of %.2d kW at z = %.2d cm and t = %.1d ps\n", A, pulsewidth, Pmax, Zmax, Tmax)
-
-%% Fourier Transform at each point z
-
-U1_hat = fft(u1, N, 2); % Fourier transform of F pulse
-U2_hat = fft(u2, N, 2); % Fourier transform of S pulse
-U3_hat = fft(u3, N, 2); % Fourier transform of P pulse
-
-delta = fftshift((2 * pi / T) * linspace(-1, 1, N)); % Adjusting delta values
-
-%% Energy plot
-Ef = trapz(t, abs(u1).^2, 2);  % Numerical integration over time for F pulse
-Es = trapz(t, abs(u2).^2, 2);  % Numerical integration over time for S pulse
-Ez = trapz(t, abs(u3).^2, 2);  % Numerical integration over time for P pulse
-
-%% Plot
-figure;
-
-subplot(1,3,1)  % Plotting Ef
-plot(z, Ef)
-xlabel('z (cm)')
-ylabel('Energy')
-title('F')
-set(gca,'TickDir','out'); 
-ylim([0 10]);  % y-axis limit to 0-10
-
-subplot(1,3,2)  % Plotting Es
-plot(z, Es)
-xlabel('z (cm)')
-ylabel('Energy')
-title('A')
-set(gca,'TickDir','out'); 
-
-subplot(1,3,3)  % Plotting Ez
-plot(z, Ez)
-xlabel('z (cm)')
-ylabel('Energy')
-title('P')
 set(gca,'TickDir','out'); 
 

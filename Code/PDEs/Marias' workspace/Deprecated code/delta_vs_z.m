@@ -49,13 +49,10 @@ theta = 70;    %Slant of waveguide wall in degrees
 
 face = w*h + h^2/tan(theta); %Area of waveguide face in cm^2
 
-%Integral of a*sech(b*x) from -ininifty to infinity= a*pi/b
-E = sqrt(A)*pi/(ratio*10^12);
+max_PW = D_T*face*10^12/A;           %Maximum allowed pulsewidth for selected pulse strength without damaging crystal
+max_PA = D_T*face*10^12/pulsewidth;  %Maximum allowed pulse strength for selected pulsewidth without damaging crystal
 
-max_PW = 2*asech(1/2)*D_T*face/(pi*sqrt(A)*10^-12);           %Maximum allowed pulsewidth for selected pulse strength without damaging crystal
-max_PA = (D_T*face*ratio*10^12/pi)^2;  %Maximum allowed pulse strength for selected pulsewidth without damaging crystal
-
-if ((E/face) > D_T)
+if ((A*pulsewidth*10^-12/face) > D_T)
     fprintf("The input laser has exceeded the damage threshold of Lithium Niobate \n")
     fprintf("Try changing the pulsewidth to be less than %.3f ps or the pulse strength to be less than %.3f kW \n", max_PW, max_PA)
     stop
@@ -73,7 +70,7 @@ u3 = uhat(:,2*N+1:3*N);
 
 
 %% Plot
-figure;
+figure; %%3 plots
 
 subplot(1,3,1)         %Plotting F pulse
 pcolor(t,z,abs(u1).^2)
@@ -81,10 +78,10 @@ shading interp
 hold on
 %plot(Beta_f1*z, z)
 hold off
-xlabel('t (ps)')
-ylabel('z (cm)')
+xlabel('t(ps)')
+ylabel('x(cm)')
 colorbar
-ylabel(colorbar, "Pulse power (kW)","fontsize",10,"rotation",270)
+ylabel(colorbar, "Pulse energy (kW)","fontsize",10,"rotation",270)
 title("F")
 set(gca,'TickDir','out'); 
 
@@ -94,10 +91,10 @@ shading interp
 hold on
 %plot(Beta_s1*z, z, color='w')
 hold off
-xlabel('t (ps)')
-ylabel('z (cm)')
+xlabel('t(ps)')
+ylabel('x(cm)')
 colorbar
-ylabel(colorbar, "Pulse power (kW)","fontsize",10,"rotation",270)
+ylabel(colorbar, "Pulse energy (kW)","fontsize",10,"rotation",270)
 title("S")
 set(gca,'TickDir','out'); 
 
@@ -107,61 +104,53 @@ shading interp
 hold on
 %plot(Beta_s1*z, z, color='w')
 hold off
-xlabel('t (ps)')
-ylabel('z (cm)')
+xlabel('t(ps)')
+ylabel('x(cm)')
 colorbar
-ylabel(colorbar, "Pulse power (kW)","fontsize",10,"rotation",270)
+ylabel(colorbar, "Pulse energy (kW)","fontsize",10,"rotation",270)
 title("P")
 set(gca,'TickDir','out'); 
 
-%% Peak finder
+%% Plot Fundamental Frequency vs. z
+%%% Frequency Analysis
 
-[Pmax,Idx] = max(abs(u3(:)).^2);
-[PmaxRow,PmaxCol] = ind2sub(size(abs(u3).^2), Idx);
-Zmax = z(PmaxRow);
-Tmax = t(PmaxCol);
+fundamental_freq_F = zeros(length(z), 1);
+fundamental_freq_S = zeros(length(z), 1);
+fundamental_freq_P = zeros(length(z), 1);
 
-fprintf("For an input laser of power %.2f kW and pulsewidth %.1d ps, the Pump pulse has a maximum amplitude of %.2d kW at z = %.2d cm and t = %.1d ps\n", A, pulsewidth, Pmax, Zmax, Tmax)
+for i = 1:length(z)
+    % Fourier transform of each pulse at the current position
+    u1_hat = fft(u1(i, :));
+    u2_hat = fft(u2(i, :));
+    u3_hat = fft(u3(i, :));
 
-%% Fourier Transform at each point z
+    % Index of the maximum amplitude in the Fourier transform
+    [~, index_F] = max(abs(u1_hat));
+    [~, index_S] = max(abs(u2_hat));
+    [~, index_P] = max(abs(u3_hat));
 
-U1_hat = fft(u1, N, 2); % Fourier transform of F pulse
-U2_hat = fft(u2, N, 2); % Fourier transform of S pulse
-U3_hat = fft(u3, N, 2); % Fourier transform of P pulse
-
-delta = fftshift((2 * pi / T) * linspace(-1, 1, N)); % Adjusting delta values
-
-%% Plot Fourier Transforms
+    % Frequency
+    fundamental_freq_F(i) = abs(delta(index_F));
+    fundamental_freq_S(i) = abs(delta(index_S));
+    fundamental_freq_P(i) = abs(delta(index_P));
+end
 
 figure;
 
-subplot(1,3,1) % Plotting Fourier transform of F pulse
-pcolor(delta, z, abs(U1_hat).^2)
-shading interp
-xlabel('Frequency (\delta)')
-ylabel('z (cm)')
-colorbar
-ylabel(colorbar, "Field Spectrum","fontsize",10,"rotation",270)
-title("F")
-set(gca,'TickDir','out');
+subplot(3, 1, 1);
+plot(z, fundamental_freq_F);
+xlabel('z (cm)');
+ylabel('\delta F (1/ps)');
+title('Fundamental Frequency \delta vs. z - F Pulse');
 
-subplot(1,3,2) % Plotting Fourier transform of S pulse
-pcolor(delta, z, abs(U2_hat).^2)
-shading interp
-xlabel('Frequency (\delta)')
-ylabel('z (cm)')
-colorbar
-ylabel(colorbar, "Field Spectrum","fontsize",10,"rotation",270)
-title("S")
-set(gca,'TickDir','out');
+subplot(3, 1, 2);
+plot(z, fundamental_freq_S);
+xlabel('z (cm)');
+ylabel('\delta S (1/ps)');
+title('Fundamental Frequency vs. z - S Pulse');
 
-subplot(1,3,3) % Plotting Fourier transform of P pulse
-pcolor(delta, z, abs(U3_hat).^2)
-shading interp
-xlabel('Frequency (\delta)')
-ylabel('z (cm)')
-colorbar
-ylabel(colorbar, "Field Spectrum","fontsize",10,"rotation",270)
-title("P")
-set(gca,'TickDir','out');
-
+subplot(3, 1, 3);
+plot(z, fundamental_freq_P);
+xlabel('z (cm)');
+ylabel('\delta P (1/ps)');
+title('Fundamental Frequency vs. z - P Pulse');
