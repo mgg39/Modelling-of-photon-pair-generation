@@ -49,10 +49,13 @@ theta = 70;    %Slant of waveguide wall in degrees
 
 face = w*h + h^2/tan(theta); %Area of waveguide face in cm^2
 
-max_PW = D_T*face*10^12/A;           %Maximum allowed pulsewidth for selected pulse strength without damaging crystal
-max_PA = D_T*face*10^12/pulsewidth;  %Maximum allowed pulse strength for selected pulsewidth without damaging crystal
+%Integral of a*sech(b*x) from -ininifty to infinity= a*pi/b
+E = sqrt(A)*pi/(ratio*10^12);
 
-if ((A*pulsewidth*10^-12/face) > D_T)
+max_PW = 2*asech(1/2)*D_T*face/(pi*sqrt(A)*10^-12);           %Maximum allowed pulsewidth for selected pulse strength without damaging crystal
+max_PA = (D_T*face*ratio*10^12/pi)^2;  %Maximum allowed pulse strength for selected pulsewidth without damaging crystal
+
+if ((E/face) > D_T)
     fprintf("The input laser has exceeded the damage threshold of Lithium Niobate \n")
     fprintf("Try changing the pulsewidth to be less than %.3f ps or the pulse strength to be less than %.3f kW \n", max_PW, max_PA)
     stop
@@ -78,10 +81,10 @@ shading interp
 hold on
 %plot(Beta_f1*z, z)
 hold off
-xlabel('t(ps)')
-ylabel('x(cm)')
+xlabel('t (ps)')
+ylabel('z (cm)')
 colorbar
-ylabel(colorbar, "Pulse energy (kW)","fontsize",10,"rotation",270)
+ylabel(colorbar, "Pulse power (kW)","fontsize",10,"rotation",270)
 title("F")
 set(gca,'TickDir','out'); 
 
@@ -91,10 +94,10 @@ shading interp
 hold on
 %plot(Beta_s1*z, z, color='w')
 hold off
-xlabel('t(ps)')
-ylabel('x(cm)')
+xlabel('t (ps)')
+ylabel('z (cm)')
 colorbar
-ylabel(colorbar, "Pulse energy (kW)","fontsize",10,"rotation",270)
+ylabel(colorbar, "Pulse power (kW)","fontsize",10,"rotation",270)
 title("S")
 set(gca,'TickDir','out'); 
 
@@ -104,10 +107,10 @@ shading interp
 hold on
 %plot(Beta_s1*z, z, color='w')
 hold off
-xlabel('t(ps)')
-ylabel('x(cm)')
+xlabel('t (ps)')
+ylabel('z (cm)')
 colorbar
-ylabel(colorbar, "Pulse energy (kW)","fontsize",10,"rotation",270)
+ylabel(colorbar, "Pulse power (kW)","fontsize",10,"rotation",270)
 title("P")
 set(gca,'TickDir','out'); 
 
@@ -119,3 +122,46 @@ Zmax = z(PmaxRow);
 Tmax = t(PmaxCol);
 
 fprintf("For an input laser of power %.2f kW and pulsewidth %.1d ps, the Pump pulse has a maximum amplitude of %.2d kW at z = %.2d cm and t = %.1d ps\n", A, pulsewidth, Pmax, Zmax, Tmax)
+
+%% Fourier Transform at each point z
+
+U1_hat = fft(u1, N, 2); % Fourier transform of F pulse
+U2_hat = fft(u2, N, 2); % Fourier transform of S pulse
+U3_hat = fft(u3, N, 2); % Fourier transform of P pulse
+
+delta = fftshift((2 * pi / T) * linspace(-1, 1, N)); % Adjusting delta values
+
+%% Plot Fourier Transforms
+
+figure;
+
+subplot(1,3,1) % Plotting Fourier transform of F pulse
+pcolor(delta, z, abs(U1_hat).^2)
+shading interp
+xlabel('Frequency (\delta)')
+ylabel('z (cm)')
+colorbar
+ylabel(colorbar, "Field Spectrum","fontsize",10,"rotation",270)
+title("F")
+set(gca,'TickDir','out');
+
+subplot(1,3,2) % Plotting Fourier transform of S pulse
+pcolor(delta, z, abs(U2_hat).^2)
+shading interp
+xlabel('Frequency (\delta)')
+ylabel('z (cm)')
+colorbar
+ylabel(colorbar, "Field Spectrum","fontsize",10,"rotation",270)
+title("S")
+set(gca,'TickDir','out');
+
+subplot(1,3,3) % Plotting Fourier transform of P pulse
+pcolor(delta, z, abs(U3_hat).^2)
+shading interp
+xlabel('Frequency (\delta)')
+ylabel('z (cm)')
+colorbar
+ylabel(colorbar, "Field Spectrum","fontsize",10,"rotation",270)
+title("P")
+set(gca,'TickDir','out');
+
