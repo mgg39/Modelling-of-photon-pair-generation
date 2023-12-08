@@ -125,36 +125,39 @@ U1_hat = fft(u1, N, 2); % Fourier transform of F pulse
 U2_hat = fft(u2, N, 2); % Fourier transform of S pulse
 U3_hat = fft(u3, N, 2); % Fourier transform of P pulse
 
-%% frequencies
+%% Frequencies
 
-% Constants
-lambda_F0 = 1.5e-6; % Wavelength of the F-field in meters
-c = 3e8; % Speed of light in meters per second
+%F
+omega_F0 = 2*pi*c/1.5; %um
+omegaF = omega_F0+delta/T;
 
-% Central frequencies
-omega_F0 = 2 * pi * c / lambda_F0;
-omega_S0 = 2 * omega_F0;
-omega_P0 = 2 * omega_F0;
+% S& P
+omega_SP0 = 2*omega_F0;
+omega = omega_SP0+2*delta/T;
 
-% Frequencies for F
-freq_F = omega_F0 + delta / T;
-% Frequencies to wavelengths for F
-lambda_F = 2 * pi * c ./ freq_F;
+%% Wavelengths
 
-% Frequencies for S & P 
-freq_S = omega_S0 + 2 * delta / T;
-freq_P = omega_P0 + 2 * delta / T;
+c = physconst('LightSpeed'); % v = c
 
-% Frequencies to wavelengths S & P
-lambda_S = 2 * pi * c ./ freq_S;
-lambda_P = 2 * pi * c ./ freq_P;
+%F
+wavelengthF = 2*pi*c/omegaF; %um
+
+% S& P
+wavelength = 2*pi*c/omega; %um
 
 %% Plot Fourier Transforms
 
 figure; % frequency
 
+xminf = 4297;
+xmaxf = 4298;
+xmin = 8594;
+xmax = 8596;
+ymin = 0;
+ymax = 1.1;
+
 subplot(1,3,1) % Plotting Fourier transform of F pulse
-pcolor(freq_F, z, abs(fftshift(U1_hat)).^2)
+pcolor(omegaF, z, abs(fftshift(U1_hat)).^2)
 shading interp
 xlabel('Frequency')
 ylabel('z (cm)')
@@ -162,9 +165,11 @@ colorbar
 ylabel(colorbar, "Field Spectrum","fontsize",10,"rotation",270)
 title("F")
 set(gca,'TickDir','out');
+xlim([xminf, xmaxf]);
+ylim([ymin, ymax]);
 
 subplot(1,3,2) % Plotting Fourier transform of S pulse
-pcolor(freq_S, z,abs(fftshift(U2_hat)).^2)
+pcolor(omega, z,abs(fftshift(U2_hat)).^2)
 shading interp
 xlabel('Frequency')
 ylabel('z (cm)')
@@ -172,9 +177,11 @@ colorbar
 ylabel(colorbar, "Field Spectrum","fontsize",10,"rotation",270)
 title("S")
 set(gca,'TickDir','out');
+xlim([xmin, xmax]);
+ylim([ymin, ymax]);
 
 subplot(1,3,3) % Plotting Fourier transform of P pulse
-pcolor(freq_P, z, abs(fftshift(U3_hat)).^2)
+pcolor(omega, z, abs(fftshift(U3_hat)).^2)
 shading interp
 xlabel('Frequency')
 ylabel('z (cm)')
@@ -182,13 +189,19 @@ colorbar
 ylabel(colorbar, "Field Spectrum","fontsize",10,"rotation",270)
 title("P")
 set(gca,'TickDir','out');
+xlim([xmin, xmax]);
+ylim([ymin, ymax]);
 
 figure; %wavelengths
 
-c = physconst('LightSpeed'); % v = c
+% Dynamically set x-axis limits based on the calculated wavelengths
+xminf = min(wavelengthF(:));
+xmaxf = max(wavelengthF(:));
+xmin = min(wavelength(:));
+xmax = max(wavelength(:));
 
 subplot(1,3,1) % Plotting Fourier transform of F pulse
-pcolor(lambda_F, z, abs(fftshift(U1_hat)).^2) %
+pcolor(wavelengthF, z, abs(fftshift(U1_hat)).^2) % wavelength = v / f
 shading interp
 xlabel('Wavelength')
 ylabel('z (cm)')
@@ -196,9 +209,10 @@ colorbar
 ylabel(colorbar, "Field Spectrum","fontsize",10,"rotation",270)
 title("F")
 set(gca,'TickDir','out');
+xlim([xminf, xmaxf]);
 
 subplot(1,3,2) % Plotting Fourier transform of S pulse
-pcolor(lambda_S, z,abs(fftshift(U2_hat)).^2)
+pcolor(wavelength, z,abs(fftshift(U2_hat)).^2)
 shading interp
 xlabel('Wavelength')
 ylabel('z (cm)')
@@ -206,9 +220,10 @@ colorbar
 ylabel(colorbar, "Field Spectrum","fontsize",10,"rotation",270)
 title("S")
 set(gca,'TickDir','out');
+xlim([xmin, xmax]);
 
 subplot(1,3,3) % Plotting Fourier transform of P pulse
-pcolor(lambda_P, z, abs(fftshift(U3_hat)).^2)
+pcolor(wavelength, z, abs(fftshift(U3_hat)).^2)
 shading interp
 xlabel('Wavelength')
 ylabel('z (cm)')
@@ -216,3 +231,4 @@ colorbar
 ylabel(colorbar, "Field Spectrum","fontsize",10,"rotation",270)
 title("P")
 set(gca,'TickDir','out');
+xlim([xmin, xmax]);
