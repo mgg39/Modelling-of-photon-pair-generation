@@ -131,10 +131,13 @@ U3_hat = fft(u3, N, 2); % Fourier transform of P pulse
 
 delta = fftshift((2 * pi / T) * linspace(-1, 1, N)); % Adjusting delta values
 
+%{
+
 %% Energy plot
 Ef = trapz(t, abs(u1).^2, 2);  % Numerical integration over time for F pulse
 Es = trapz(t, abs(u2).^2, 2);  % Numerical integration over time for S pulse
 Ez = trapz(t, abs(u3).^2, 2);  % Numerical integration over time for P pulse
+
 
 %% Plot
 figure;
@@ -160,4 +163,4 @@ xlabel('z (cm)')
 ylabel('Energy')
 title('P')
 set(gca,'TickDir','out'); 
-
+%}
