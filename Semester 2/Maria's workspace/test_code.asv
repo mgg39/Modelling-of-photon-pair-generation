@@ -18,21 +18,10 @@ lambda_max = 1.65e-9; % Maximum wavelength in meters
 wi = wavelength_to_frequency_wi(lambda_min, lambda_max);
 ws = wavelength_to_frequency_ws(lambda_min, lambda_max);
 
-[S,I] = meshgrid(wi,ws);
-
-wi_matrix = meshgrid(wi,wi);
-
-num_columns = length(ws); 
-
-[X, ~] = meshgrid(1:num_columns, 1:numel(ws));
-
-ws_matrix = repmat(array_1d(:), 1, num_columns);
-
-disp(ws_matrix);
-
+[S,I] = meshgrid(ws,ws);
 
 %% Betas
-%Betas = interp1(x, lscan_photon, xq, linear);
+Betas = interp1(x, lscan_photon, xq, linear);
 
 
 %% Plotting
