@@ -26,7 +26,7 @@ num_columns = length(ws);
 
 [X, ~] = meshgrid(1:num_columns, 1:numel(ws));
 
-ws_matrix = repmat(array_1d(:), 1, num_columns);
+ws_matrix = repmat(ws, 1, num_columns);
 
 disp(ws_matrix);
 
