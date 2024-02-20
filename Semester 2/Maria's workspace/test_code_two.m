@@ -21,9 +21,10 @@ n_max = max(neff_photon);
 
 %diff array lengths to ensure proper size multiplication
 wi = linspace(omega_min, omega_max, 1000); 
-ws = linspace(omega_min, omega_max, 1020);
+ws = linspace(omega_min, omega_max, 1000);
+wp0 = wi + ws;
 ni = linspace(n_max, n_min, 1000); 
-ns = linspace(n_max, n_min, 1020);
+ns = linspace(n_max, n_min, 1000);
 
 [Ws,Wi] = meshgrid(ws,wi);  %Ws vertical, Wi horizontal
 [Ns, Ni] = meshgrid(ns, ni);   %Converting arrays to meshgrids 
@@ -44,7 +45,7 @@ Beta_i = Wi.*Ni./c;
 Beta_p = Wp.*Np./c;   %calculating beta values for all 3 pulses
 delta_beta = Beta_p - Beta_s - Beta_i;  %calculating delta_beta
 
-phi = sinc(delta_beta, Zmax);    
+phi = my_sinc(delta_beta);    
 
 %% Plotting
 
@@ -53,16 +54,14 @@ figure;
 
 % Wi vs Ws
 subplot(1,2,1);
-contour(ws, wi, phi, 20, 'LineWidth', 1.5);
-colorbar;
+contour(ws, wi, phi, 20, 'LineWidth', 1.5, 'LineColor', 'k');
 xlabel('Frequency (s)');
 ylabel('Frequency (i)');
-title('Phi Contour Plot');
+title('Wi vs Ws');
 
-% Wi vs Wp
+% Wi vs Wp0
 subplot(1,2,2);
-contour(Wp, wi, phi, 20, 'LineWidth', 1.5);
-colorbar;
+contour(wp0, wi, phi, 20, 'LineWidth', 1.5, 'LineColor', 'k');
 xlabel('Frequency (p)');
 ylabel('Frequency (i)');
-title('Phi Contour Plot (Line)');
+title('Wi vs Wp0');
