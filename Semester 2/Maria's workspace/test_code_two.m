@@ -22,7 +22,7 @@ n_max = max(neff_photon);
 %diff array lengths to ensure proper size multiplication
 wi = linspace(omega_min, omega_max, 1000); 
 ws = linspace(omega_min, omega_max, 1000);
-wp0 = wi + ws;
+wp_0 = wi + ws;
 ni = linspace(n_max, n_min, 1000); 
 ns = linspace(n_max, n_min, 1000);
 
@@ -45,10 +45,10 @@ Beta_i = Wi.*Ni./c;
 Beta_p = Wp.*Np./c;   %calculating beta values for all 3 pulses
 delta_beta = Beta_p - Beta_s - Beta_i;  %calculating delta_beta
 
-phi = my_sinc(delta_beta);    
+phi = my_sinc(delta_beta,Zmax);    
+disp(phi);
 
-%% Plotting
-
+%% Plotting - M
 % Plotting phi as contour plots
 figure;
 
@@ -57,11 +57,17 @@ subplot(1,2,1);
 contour(ws, wi, phi, 20, 'LineWidth', 1.5, 'LineColor', 'k');
 xlabel('Frequency (s)');
 ylabel('Frequency (i)');
-title('Wi vs Ws');
+title('I');
 
 % Wi vs Wp0
 subplot(1,2,2);
-contour(wp0, wi, phi, 20, 'LineWidth', 1.5, 'LineColor', 'k');
+contour(wp_0, wi, phi, 20, 'LineWidth', 1.5, 'LineColor', 'k');
 xlabel('Frequency (p)');
 ylabel('Frequency (i)');
-title('Wi vs Wp0');
+title('S');
+
+%% Plotting - C
+figure;
+
+pcolor(Ws, Wi, phi)
+colorbar

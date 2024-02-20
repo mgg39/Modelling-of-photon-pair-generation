@@ -1,10 +1,6 @@
-function y = my_sinc(x)
-    % Ensure that the denominator is not zero
-    idx = (x ~= 0);
-    
+function y = my_sinc(x,Zmax)
+
     % Calculate sinc function values
-    y = sin(pi * x) ./ (pi * x);
+    y = sin(x.*Zmax/2).*(x.*Zmax/2).^-1;
     
-    % Set the value at x=0 to 1
-    y(~idx) = 1;
 end
