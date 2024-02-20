@@ -1,16 +1,16 @@
 clear all, close all
 clc
+%% Constants
 
-% Constants
 N = 1024;
-c = 299792458; %Speed of light
-Zmax = 0.03; %length of waveguide
+c = 299792458;    %Speed of light
+Zmax = 0.03;      %length of waveguide
 
 load("photon_disp.mat"); 
 lscan_photon = lamscan; 
 neff_photon=neff;   %Data for i and s pulses
 
-load("pump_disp.mat"); lscan_pump = lamscan; neff_pump=neff; %Data for pump pulse
+load("pump_disp.mat"); lscan_pump = lamscan; neff_pump=neff;         %Data for pump pulse
 lscan_pump=lscan_pump*10^-6;   %Converting from um to m
 
 lambda_min = 1.35e-6; % Minimum and maximum wavelength in meters
@@ -38,29 +38,42 @@ wscan_pump=2*pi*c./(lscan_pump);
 [Ns, Ni] = meshgrid(ns, ni);   %Converting arrays to meshgrids 
 Wp = Ws + Wi;  %freq_p = freq_s + freq_i
 
-Np = spline(wscan_pump,neff_pump,Ws+Wi);
 
-% Betas
+fitType = @(a, x) a ./ x;
+startPoint = [1.5e-6]; % Initial guess for the parameter
+params = lsqcurvefit(fitType, startPoint, lscan_pump, neff_pump);  %fitting pump data to above equation
+lambda_0 = params(1); %defining lambda_0
+
+Np = lambda_0*Wp./(2*pi*c);    %creating meshgrid of n_eff for pump pulse
+
+%% Betas
+
 Beta_s = Ws.*Ns./c; 
 Beta_i = Wi.*Ni./c; 
 Beta_p = Wp.*Np./c;   %calculating beta values for all 3 pulses
-
 delta_beta = Beta_p - Beta_s - Beta_i;  %calculating delta_beta
-phi = my_sinc(delta_beta,Zmax);    
 
+phi = my_sinc(delta_beta,Zmax);    
+disp(phi);
+
+Np = spline(wscan_pump,neff_pump,Ws+Wi);
+alpha = exp(-(Ws+Wi).^2/10^2);
+
+figure
+pcolor(Ws,Wi,alpha)
+shading interp
 w0=2*pi*c/750e-9;
+alpha=exp(-(Ws+Wi-w0).^2*1e-24/2);
+
+figure
+pcolor(Ws,Wi,alpha)
+shading interp
 alpha=exp(-(Ws+Wi-w0).^2*0.25e-24/2);
 
 figure
-pcolor(Ws,Wi,alpha);
-shading interp;
-xlabel('Frequency (p)');
-ylabel('Frequency (i)');
-title('Alpha');
+pcolor(Ws,Wi,alpha)
+shading interp
 
 figure
-pcolor(Ws,Wi,alpha.*phi);
-shading interp;
-xlabel('Frequency (p)');
-ylabel('Frequency (i)');
-title('Phi');
+pcolor(Ws,Wi,alpha.*phi)
+shading interp
