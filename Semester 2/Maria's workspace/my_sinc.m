@@ -1,6 +1,7 @@
-function y = my_sinc(x,Zmax)
-
+function y = my_sinc(x)
+ 
     % Calculate sinc function values
-    y = sin(x.*Zmax/2).*(x.*Zmax/2).^-1;
-    
+   y = sin(x)./x;
+   y(x==0) = 1;
+   
 end
