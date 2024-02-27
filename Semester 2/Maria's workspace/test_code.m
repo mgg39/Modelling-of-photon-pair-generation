@@ -67,19 +67,17 @@ title('Phi');
 %---------------------------------------------------------------
 
 %placeholder vars
-O = 2; 
-p = 3; 
+p = 1; %gamma from ODEs
 
 % placeholder grid domain vals
-z = -3:.1:3; 
+z = 0:.1:3; 
 
 %currently broken due to array size differences ----------------
 disp(size(Beta_p));
-disp(size(O));
 disp(size(z));
 %---------------------------------------------------------------
 
-f = p .* exp(1i .* Beta_p .* O .* z);
+f = p .* exp(1i .* Beta_p .* z);
 
 I = trapz(f);
 disp(I);
