@@ -61,3 +61,25 @@ shading interp;
 xlabel('Frequency (p)');
 ylabel('Frequency (i)');
 title('Phi');
+
+%---------------------------------------------------------------
+% Integral
+%---------------------------------------------------------------
+
+%placeholder vars
+O = 2; 
+p = 3; 
+
+% placeholder grid domain vals
+z = -3:.1:3; 
+
+%currently broken due to array size differences ----------------
+disp(size(Beta_p));
+disp(size(O));
+disp(size(z));
+%---------------------------------------------------------------
+
+f = p .* exp(1i .* Beta_p .* O .* z);
+
+I = trapz(f);
+disp(I);
