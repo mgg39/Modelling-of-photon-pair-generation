@@ -46,7 +46,7 @@ delta_beta = Beta_p - Beta_s - Beta_i;  %calculating delta_beta
 phi = my_sinc(delta_beta.*Zmax/2);
 
 w0=2*pi*c/750e-9;
-alpha=exp(-(Ws+Wi-w0).^2*0.25e-24/2);
+alpha=exp(-(Ws+Wi-w0).^2*0.25e-24/2); %TODO: change - assumed gaussian not sech
 
 figure
 pcolor(Ws,Wi,alpha);
