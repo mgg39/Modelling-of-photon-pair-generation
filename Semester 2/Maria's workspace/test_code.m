@@ -48,6 +48,7 @@ phi = my_sinc(delta_beta.*Zmax/2);
 w0=2*pi*c/750e-9;
 alpha=exp(-(Ws+Wi-w0).^2*0.25e-24/2); %TODO: change - assumed gaussian not sech
 
+%{
 figure
 pcolor(Ws,Wi,alpha);
 shading interp;
@@ -61,23 +62,28 @@ shading interp;
 xlabel('Frequency (p)');
 ylabel('Frequency (i)');
 title('Phi');
+%}
 
-%---------------------------------------------------------------
+%---------------------------------------------------------------------
 % Integral
-%---------------------------------------------------------------
+%---------------------------------------------------------------------
 
-%placeholder vars
-p = 1; %gamma from ODEs
+omega = 3; %placeholder
 
-% placeholder grid domain vals
-z = 0:.1:3; 
+apha = exp((-(ws + wi - w0).^2)/omega); %dep wi & ws, cnst in z
 
-%currently broken due to array size differences ----------------
-disp(size(Beta_p));
-disp(size(z));
-%---------------------------------------------------------------
+f = zeros(size(Ws)); %initialising f
 
-f = p * exp(1i * Beta_p * z);
+for z = 0:Zmax
+    f = f + alpha * exp(1i * delta_beta * z);
+end
 
-I = trapz(f);
-disp(I);
+figure
+pcolor(Wp,Wi, f);
+shading interp;
+xlabel('Wp');
+ylabel('Wi');
+title('Test');
+
+
+
