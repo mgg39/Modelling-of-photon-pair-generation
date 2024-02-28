@@ -46,44 +46,44 @@ delta_beta = Beta_p - Beta_s - Beta_i;  %calculating delta_beta
 phi = my_sinc(delta_beta.*Zmax/2);
 
 w0=2*pi*c/750e-9;
-alpha=exp(-(Ws+Wi-w0).^2*0.25e-24/2); %TODO: change - assumed gaussian not sech
+alpha=exp(-(Ws+Wi-w0).^2*0.25e-24/2); %TODO: change - assumed gaussian not sech ?
 
-%{
+
 figure
 pcolor(Ws,Wi,alpha);
 shading interp;
-xlabel('Frequency (p)');
+xlabel('Frequency (s)');
 ylabel('Frequency (i)');
 title('Alpha');
 
 figure
 pcolor(Ws,Wi,alpha.*phi);
 shading interp;
-xlabel('Frequency (p)');
+xlabel('Frequency (s)');
 ylabel('Frequency (i)');
 title('Phi');
-%}
+
 
 %---------------------------------------------------------------------
 % Integral
 %---------------------------------------------------------------------
 
-omega = 3; %placeholder
-
-apha = exp((-(ws + wi - w0).^2)/omega); %dep wi & ws, cnst in z
-
 f = zeros(size(Ws)); %initialising f
+deltaz = 0.001;
 
-for z = 0:Zmax
-    f = f + alpha * exp(1i * delta_beta * z);
+for z = 0:deltaz:Zmax
+    for omega = omega_min:1e+14:omega_max
+        apha = exp((-(ws + wi - w0).^2)/omega^2); %dep wi & ws, cnst in z
+        f = f + alpha * exp(1i * delta_beta * z) * deltaz;
+    end
 end
 
 figure
-pcolor(Wp,Wi, f);
+pcolor(Ws,Wi, abs(f));
 shading interp;
-xlabel('Wp');
-ylabel('Wi');
-title('Test');
+xlabel('Frequency (s)');
+ylabel('Frequency (i)');
+title('Integral');
 
 
 
