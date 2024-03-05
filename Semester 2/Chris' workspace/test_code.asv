@@ -125,7 +125,7 @@ end
 % AG: and you need to add the final point
 
 
- trap = trap + 0.5*alpha.*exp(1i*delta_beta.*Zmax)*dz;
+ trap = trap + alpha.*exp(1i*delta_beta.*Zma)*dz;
 
 
 figure
