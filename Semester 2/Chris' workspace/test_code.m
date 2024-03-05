@@ -5,7 +5,7 @@ clc
 
 N=1024;
 c = 299792458; %Speed of light
-Zmax = 0.02; %length of waveguide in m
+Zmax = 0.03; %length of waveguide in m
 
 load("photon_disp.mat"); %Data for i and s pulses
 lscan_photon = lamscan; neff_photon=neff;   
@@ -105,18 +105,22 @@ set(gca,'TickDir','out');
 
 dz = Zmax/N;
 
+<<<<<<< HEAD
 trap = 0.5 * alpha.*dz;
+=======
+trap = alpha.*0.5*dz + alpha.*exp(1i*delta_beta.*Zmax).*0.5*dz;
+>>>>>>> 7b5536f8860c53baea1f6ce24bf3617c6eef07f6
 
 for c=1:N-1
-
-    % AG: you need to multiply by the step size dz to obtain the area!
-
     trap = trap + alpha.*exp(1i*delta_beta.*dz*c)*dz;
 end
 
+<<<<<<< HEAD
  trap = trap + 0.5*alpha.*exp(1i*delta_beta.*Zmax)*dz; %final point
 
 
+=======
+>>>>>>> 7b5536f8860c53baea1f6ce24bf3617c6eef07f6
 figure
 pcolor(Ws,Wi, abs(trap));
 shading interp;
