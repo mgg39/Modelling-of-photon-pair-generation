@@ -105,15 +105,7 @@ set(gca,'TickDir','out');
 
 dz = Zmax/N;
 
-% AG: I do not understand why you multiply by alpha function twice here
-% and what that final 0.5 multiplier stands for? 
-
-%trap = alpha.*0.5 * alpha.*exp(1i*delta_beta.*Zmax).*0.5;
-
-% AG: at the first position z=0, hence exp(...)=1;
-
 trap = 0.5 * alpha.*dz;
-
 
 for c=1:N-1
 
@@ -122,10 +114,7 @@ for c=1:N-1
     trap = trap + alpha.*exp(1i*delta_beta.*dz*c)*dz;
 end
 
-% AG: and you need to add the final point
-
-
- trap = trap + 0.5*alpha.*exp(1i*delta_beta.*Zmax)*dz;
+ trap = trap + 0.5*alpha.*exp(1i*delta_beta.*Zmax)*dz; %final point
 
 
 figure
