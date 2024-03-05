@@ -1,8 +1,8 @@
 clear all, close all 
 clc
 
-T = 20; % time domain width
-N = 1024; % N discretization points
+T = 40; % time domain width
+N = 2048; % N discretization points
 dt = T/N; 
 t = [-T/4 : dt : 3*T/4 - dt]'; % time domain in ps (ps determined by constants)
 
@@ -62,7 +62,7 @@ if ((E/face) > D_T)
 end
 
 %% Fourier Frequency domain
-zend = 5*T/(8*Beta_f1);
+zend = 5*T/(16*Beta_f1);
 z = [0:zend/(N-1):zend]'; % Spacial domain in cm (cm determined by contsants)
 
 [z, uhat] = ode45(@(z, uhat) CoupledPDEs(z,uhat,N,delta,Beta_f1,Beta_f2,Beta_s1,Beta_s2,Beta_p2,kappa,gamma,C), z, u0, opts);
@@ -117,18 +117,16 @@ set(gca,'TickDir','out');
 
 %% Converting P(z, t) to P(z, w)
 
-P = fft(u3, [], 2);                  %Defining a matrix P as the FT of u3
+P = fft(u3, [], 2);       %Defining a matrix P as the FT of u3
 P_shift = fftshift(P,2)/size(P, 2);  %Shifting P so that omega=0 is centred
 
-samp_freq = 1/(2*dt*10^-12);
-
-freqs = linspace(-samp_freq/2, samp_freq/2, size(P, 2));   %Creating an array of the frequency range
+freqs = 2 * pi /(T*10^-12) * [-N/2 : 1 : N/2 - 1];
 
 figure
 pcolor(freqs,z,abs(P_shift).^2)   %Plotting the FT pulse
 shading interp
 hold on
-xline(0, 'w--')   %Plotting a vertical line at 0 to observe the ofset of teh frequencies
+xline(0, 'w--')   %Plotting a vertical line at 0 to observe the offset of teh frequencies
 hold off
 xlabel('\omega (Hz)')
 ylabel('z (cm)')
