@@ -5,7 +5,7 @@ clc
 
 N=1024;
 c = 299792458; %Speed of light
-Zmax = 0.02; %length of waveguide in m
+Zmax = 0.03; %length of waveguide in m
 
 load("photon_disp.mat"); %Data for i and s pulses
 lscan_photon = lamscan; neff_photon=neff;   
@@ -105,28 +105,11 @@ set(gca,'TickDir','out');
 
 dz = Zmax/N;
 
-% AG: I do not understand why you multiply by alpha function twice here
-% and what that final 0.5 multiplier stands for? 
-
-%trap = alpha.*0.5 * alpha.*exp(1i*delta_beta.*Zmax).*0.5;
-
-% AG: at the first position z=0, hence exp(...)=1;
-
-trap = 0.5 * alpha.*dz;
-
+trap = alpha.*0.5*dz + alpha.*exp(1i*delta_beta.*Zmax).*0.5*dz;
 
 for c=1:N-1
-
-    % AG: you need to multiply by the step size dz to obtain the area!
-
     trap = trap + alpha.*exp(1i*delta_beta.*dz*c)*dz;
 end
-
-% AG: and you need to add the final point
-
-
- trap = trap + 0.5*alpha.*exp(1i*delta_beta.*Zmax)*dz;
-
 
 figure
 pcolor(Ws,Wi, abs(trap));
