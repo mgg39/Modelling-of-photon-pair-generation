@@ -18,9 +18,8 @@ lscan_pump=lscan_pump*10^-6;   %Converting from um to m
 %% 
 
 omega_max = 2*pi*c/lambda_min; omega_min = 2*pi*c/lambda_max;
-wi = linspace(omega_min, omega_max, 2000); 
-ws = linspace(omega_min, omega_max, 2000);
-wp_0 = wi + ws;
+wi = linspace(1.34e15, 1.37e15, 2000); 
+ws = linspace(1.148e15, 1.165e15, 2000);
 
 wscan_photon=2*pi*c./(lscan_photon);
 
@@ -79,48 +78,17 @@ colorbar;
 %caxis([0 1]);
 set(gca,'TickDir','out'); 
 
-figure
-pcolor(Ws,Wi,alpha.*phi);
-shading interp;
-xlabel('\omega_s (Hz)');
-ylabel('\omega_i (Hz)');
-title('Closeup 1');
-xlim([1.148e15 1.165e15])
-ylim([1.34e15 1.37e15])
-colorbar;
-%caxis([0 1]);
-set(gca,'TickDir','out'); 
+%% Integration
 
-figure
-pcolor(Ws,Wi,alpha.*phi);
-shading interp;
-xlabel('\omega_s (Hz)');
-ylabel('\omega_i (Hz)');
-title('Closeup 2');
-xlim([1.34e15 1.37e15])
-ylim([1.148e15 1.165e15])
-colorbar;
-%caxis([0 1]);
-set(gca,'TickDir','out'); 
 
 dz = Zmax/N;
 
-<<<<<<< HEAD
-trap = 0.5 * alpha.*dz;
-=======
 trap = alpha.*0.5*dz + alpha.*exp(1i*delta_beta.*Zmax).*0.5*dz;
->>>>>>> 7b5536f8860c53baea1f6ce24bf3617c6eef07f6
 
 for c=1:N-1
     trap = trap + alpha.*exp(1i*delta_beta.*dz*c)*dz;
 end
 
-<<<<<<< HEAD
- trap = trap + 0.5*alpha.*exp(1i*delta_beta.*Zmax)*dz; %final point
-
-
-=======
->>>>>>> 7b5536f8860c53baea1f6ce24bf3617c6eef07f6
 figure
 pcolor(Ws,Wi, abs(trap));
 shading interp;
