@@ -151,4 +151,4 @@ fprintf("For an input laser of power %.2f kW and pulsewidth %.1d ps, the Pump pu
 
 %% File writer
 
-save('PumpPulse.mat', 'P_shift');   %Saving the FT pulse for import into the conservation of energy/momentum code
+save('PumpPulse.mat', 'P_shift', 'freqs', 'z');   %Saving the FT pulse for import into the conservation of energy/momentum code
