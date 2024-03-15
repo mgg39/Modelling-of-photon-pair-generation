@@ -1,9 +1,11 @@
 clear all, close all
 clc
 
+tic;  %Measuring time elapsed over code
+
 %% Constants
 
-N=1024;
+N = 2048;
 c = 299792458; %Speed of light
 
 load("photon_disp.mat"); %Data for i and s pulses
@@ -19,7 +21,7 @@ Zmax = max(z)/100;  %Defining Zmax as the length of the waveguide (converting fr
 %% 
 
 wi = linspace(1.34e15, 1.37e15, 2000); 
-ws = linspace(1.148e15, 1.165e15, 2000);
+ws = linspace(1.146e15, 1.166e15, 2000);
 
 wscan_photon=2*pi*c./(lscan_photon);
 
@@ -55,7 +57,6 @@ xlabel('\omega_s (Hz)');
 ylabel('\omega_i (Hz)');
 title('\alpha');
 colorbar;
-%caxis([0 1]);
 set(gca,'TickDir','out'); 
 
 figure
@@ -65,7 +66,6 @@ xlabel('\omega_s (Hz)');
 ylabel('\omega_i (Hz)');
 title('\phi');
 colorbar;
-%caxis([0 1]);
 set(gca,'TickDir','out'); 
 
 figure
@@ -75,25 +75,31 @@ xlabel('\omega_s (Hz)');
 ylabel('\omega_i (Hz)');
 title('\phi \alpha');
 colorbar;
-%caxis([0 1]);
 set(gca,'TickDir','out'); 
 
 %% Integration
 
-
 dz = Zmax/N;
 Z = linspace(0, Zmax, dz);
 
-trap = interp1(freqs, interp1(z, P_shift, 0), Wp).*0.5*dz + interp1(freqs, interp1(z, P_shift, Zmax), Wp).*exp(1i*delta_beta.*Zmax).*0.5*dz;
+trap = interp1(freqs, interp1(z, P_shift, 0), Wp).*0.5*dz + interp1(freqs, interp1(z, P_shift, Zmax), Wp).*exp(1i*delta_beta.*Zmax)*0.5*dz;
+%dummy_trap = alpha.*0.5*dz + alpha.*exp(1i*delta_beta.*Zmax)*0.5*dz;
 
 for c=1:N-1
     trap = trap + interp1(freqs, interp1(z, P_shift, dz*c), Wp).*exp(1i*delta_beta.*dz*c)*dz;
+    %dummy_trap = dummy_trap + alpha.*exp(1i*delta_beta.*dz*c)*dz;
 end
 
 figure
+
 pcolor(Ws,Wi,abs(trap));
 shading interp;
 xlabel('\omega_s (Hz)');
 ylabel('\omega_i (Hz)');
 title('Integral');
 colorbar
+
+%% Timer
+
+elapsed_time = toc;
+disp(['Elapsed time: ', num2str(elapsed_time), ' seconds']);

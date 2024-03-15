@@ -1,10 +1,12 @@
 clear all, close all 
 clc
 
-T = 40; % time domain width
+tic;
+
+T = 80; % time domain width
 N = 2048; % N discretization points
 dt = T/N; 
-t = [-T/4 : dt : 3*T/4 - dt]'; % time domain in ps (ps determined by constants)
+t = [-3*T/8 : dt : 5*T/8 - dt]'; % time domain in ps (ps determined by constants)
 
 delta = (2 * pi / T) * [-N/2 : 1 : N/2 - 1]';  %Inverse time domain
 delta = fftshift(delta);
@@ -15,9 +17,9 @@ Beta_s2 = 0.22e-2; %Units in ps^2/cm
 Beta_p2 = 2.53e-2; %Units in ps^2/cm
 Beta_f1 = 563.3e-2; %Units in ps/cm
 Beta_s1 = 533.3e-2; %Units in ps/cm
+
 kappa =  6.9e3; %Units in 1/cm
 gamma = 1*10^1.5; %Units in 1/(cm*sqrt(kW))
-
 C = 1; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
 
 %% Initial conditions
@@ -30,11 +32,7 @@ pulsewidth = 10;                    %Pulse width of laser (timeframe already sca
 A = 1;                              %Amplitude of laser pulse in kiloWatts (kW scaled by constants)
 ratio = 2*asech(1/2)/pulsewidth;     %Finding the ratio between the desired pulsewidth and FWHM of a sech curve to scale t by
 
-for c=1:N
-    u0(c)=sqrt(A)*sech(t(c)*ratio)*(1+1i)/sqrt(2);  %Sech represents laser pulses very well
-                                    %Actual hiehgt of sech curve is A^2 (due to abs(u3).^2) so
-                                    %is scaled by sqrt(A)
-end 
+u0(1:N) = sqrt(A)*sech(t*ratio); %*(1+1i)/sqrt(2);
 
 %Other pulses remain at 0 for initial conditions
 
@@ -62,7 +60,7 @@ if ((E/face) > D_T)
 end
 
 %% Fourier Frequency domain
-zend = 5*T/(16*Beta_f1);
+zend = 3*T/(16*Beta_f1);
 z = [0:zend/(N-1):zend]'; % Spacial domain in cm (cm determined by contsants)
 
 [z, uhat] = ode45(@(z, uhat) CoupledPDEs(z,uhat,N,delta,Beta_f1,Beta_f2,Beta_s1,Beta_s2,Beta_p2,kappa,gamma,C), z, u0, opts);
@@ -84,7 +82,7 @@ hold off
 xlabel('t(ps)')
 ylabel('z(cm)')
 colorbar
-caxis([0 1])
+%caxis([0 1])
 ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
 title("F")
 set(gca,'TickDir','out'); 
@@ -124,19 +122,50 @@ lambda = 750*10^-9;
 c = 299792458; %Speed of light
 w_0 = 2*pi*c/lambda;
 
-freqs = 2 * pi /(T*10^-12) * [-N/2 : 1 : N/2 - 1] + w_0;
+freqs = fftshift(delta)*1e12 + w_0;
 
 figure
+
+subplot(1,3,1)
 pcolor(freqs,z,abs(P_shift).^2)   %Plotting the FT pulse
 shading interp
 hold on
-xline(0, 'w--')   %Plotting a vertical line at 0 to observe the offset of teh frequencies
+xline(w_0, 'w--')   %Plotting a vertical line at 0 to observe the offset of teh frequencies
 hold off
 xlabel('\omega (Hz)')
+xlim([2.5105e15 2.5125e15])
 ylabel('z (cm)')
 colorbar
 ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
 title("P(z, \omega)")
+set(gca,'TickDir','out'); 
+
+subplot(1,3,2)
+pcolor(freqs,z,real(P_shift))   %Plotting the FT pulse
+shading interp
+hold on
+xline(w_0, 'w--')   %Plotting a vertical line at 0 to observe the offset of teh frequencies
+hold off
+xlabel('\omega (Hz)')
+xlim([2.5105e15 2.5125e15])
+ylabel('z (cm)')
+colorbar
+ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
+title("Re[P(z, \omega)]")
+set(gca,'TickDir','out'); 
+
+subplot(1,3,3)
+pcolor(freqs,z,imag(P_shift))   %Plotting the FT pulse
+shading interp
+hold on
+xline(w_0, 'w--')   %Plotting a vertical line at 0 to observe the offset of teh frequencies
+hold off
+xlabel('\omega (Hz)')
+xlim([2.5105e15 2.5125e15])
+ylabel('z (cm)')
+colorbar
+ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
+title("Im[P(z, \omega)]")
 set(gca,'TickDir','out'); 
 
 
@@ -152,3 +181,8 @@ fprintf("For an input laser of power %.2f kW and pulsewidth %.1d ps, the Pump pu
 %% File writer
 
 save('PumpPulse.mat', 'P_shift', 'freqs', 'z');   %Saving the FT pulse for import into the conservation of energy/momentum code
+
+%% Timer
+
+elapsed_time = toc;
+disp(['Elapsed time: ', num2str(elapsed_time), ' seconds']);
