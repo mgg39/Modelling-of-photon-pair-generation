@@ -3,10 +3,15 @@ clc
 
 tic;
 
-% Paramenters
-T = 80; % time domain width
+T = 320; % time domain width
 N = 2048; % N discretization points
+dt = T/N; 
+t = [-T/2 : dt : T/2 - dt]'; % time domain in ps (ps determined by constants)
 
+delta = (2 * pi / T) * [-N/2 : 1 : N/2 - 1]';  %Inverse time domain
+delta = fftshift(delta);
+
+% Constants
 Beta_f2 = 0.83e-2; %Units in ps^2/cm
 Beta_s2 = 0.22e-2; %Units in ps^2/cm
 Beta_p2 = 2.53e-2; %Units in ps^2/cm
@@ -14,15 +19,8 @@ Beta_f1 = 563.3e-2; %Units in ps/cm
 Beta_s1 = 533.3e-2; %Units in ps/cm
 
 kappa =  6.9e3; %Units in 1/cm
-gamma = 1*10^1.5; %Units in 1/(cm*sqrt(kW))
+gamma = 10^1.5; %Units in 1/(cm*sqrt(kW))
 C = 1; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
-
-% Post-parameter vals
-dt = T/N; 
-t = [-3*T/8 : dt : 5*T/8 - dt]'; % time domain in ps (ps determined by constants)
-
-delta = (2 * pi / T) * [-N/2 : 1 : N/2 - 1]';  %Inverse time domain
-delta = fftshift(delta);
 
 %% Initial conditions
 
@@ -62,7 +60,7 @@ if ((E/face) > D_T)
 end
 
 %% Fourier Frequency domain
-zend = 3*T/(16*Beta_f1);
+zend = 13*T/(256*Beta_f1);
 z = [0:zend/(N-1):zend]'; % Spacial domain in cm (cm determined by contsants)
 
 [z, uhat] = ode45(@(z, uhat) CoupledPDEs(z,uhat,N,delta,Beta_f1,Beta_f2,Beta_s1,Beta_s2,Beta_p2,kappa,gamma,C), z, u0, opts);
@@ -79,9 +77,10 @@ subplot(1,3,1)         %Plotting F pulse
 pcolor(t,z,abs(u1).^2)
 shading interp
 hold on
-%plot(Beta_f1*z, z)
+%plot(Beta_f1*z, z, 'k-', Beta_s1*z, z, 'k--')
 hold off
 xlabel('t(ps)')
+xlim([[-pulsewidth 3*pulsewidth]])
 ylabel('z(cm)')
 colorbar
 %caxis([0 1])
@@ -93,9 +92,10 @@ subplot(1,3,2)         %Plotting S pulse
 pcolor(t,z,abs(u2).^2)
 shading interp
 hold on
-%plot(Beta_s1*z, z, color='w')
+%plot(Beta_f1*z, z, 'w-', Beta_s1*z, z, 'w--')
 hold off
 xlabel('t(ps)')
+xlim([[-pulsewidth 3*pulsewidth]])
 ylabel('z(cm)')
 colorbar
 ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
@@ -106,35 +106,21 @@ subplot(1,3,3)          %Plotting P pulse
 pcolor(t,z,abs(u3).^2)
 shading interp
 hold on
-%plot(Beta_s1*z, z, color='w')
+%plot(Beta_f1*z, z, 'w-', Beta_s1*z, z, 'w--')
 hold off
 xlabel('t(ps)')
+xlim([[-pulsewidth 3*pulsewidth]])
 ylabel('z(cm)')
 colorbar
 ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
 title("P")
 set(gca,'TickDir','out'); 
 
-%{
-%% Converting P(z, t) to P(z, w) SHIFTED
-
-% Shift the P-field pulse closer to the center of the time window
-u3_shifted = circshift(u3, [0, round(N/2)]);
-
-P = fft(u3_shifted, [], 2);       % Defining a matrix P as the FT of u3
-P_shift = fftshift(P,2)/size(P, 2);  % Shifting P so that omega=0 is centred
-
-lambda = 750*10^-9;
-c = 299792458; % Speed of light
-w_0 = 2*pi*c/lambda;
-
-freqs = fftshift(delta)*1e12 + w_0;
-%}
-
 %% Converting P(z, t) to P(z, w)
 
-P = fft(u3, [], 2);       %Defining a matrix P as the FT of u3
-P_shift = fftshift(P,2)/size(P, 2);  %Shifting P so that omega=0 is centred
+P = fftshift(u3,2);
+P = fft(P, [], 2);       %Defining a matrix P as the FT of u3
+P_shift = fftshift(P,2);  %Shifting P so that omega=0 is centred
 
 lambda = 750*10^-9;
 c = 299792458; %Speed of light
@@ -196,6 +182,13 @@ Tmax = t(PmaxCol);
 
 fprintf("For an input laser of power %.2f kW and pulsewidth %.1d ps, the Pump pulse has a maximum amplitude of %.2d kW at z = %.2d cm and t = %.1d ps\n", A, pulsewidth, Pmax, Zmax, Tmax)
 
+[PmaxW,IdxW] = max(abs(P_shift(:)).^2);
+[PmaxWRow,PmaxWCol] = ind2sub(size(abs(P_shift).^2),IdxW);
+
+P_z = abs(P_shift(PmaxWRow,:)).^2;
+%w_half = 2*abs(spline(P_z(1:N/2), freqs(1:N/2), PmaxW/2) - w_0);
+
+
 %% File writer
 
 save('PumpPulse.mat', 'P_shift', 'freqs', 'z');   %Saving the FT pulse for import into the conservation of energy/momentum code
@@ -204,35 +197,3 @@ save('PumpPulse.mat', 'P_shift', 'freqs', 'z');   %Saving the FT pulse for impor
 
 elapsed_time = toc;
 disp(['Elapsed time: ', num2str(elapsed_time), ' seconds']);
-
-%% JSA
-dw = 1; %spectral width
-
-% Generate constant spectral shape P(omega)
-omega = freqs; % Using the frequencies from the previous calculation
-P_omega = exp(-(omega.^2) / (2*dw^2)); % Gaussian spectral shape
-
-JSA = zeros(length(omega)); % Initialize JSA matrix
-for i = 1:length(omega)
-    for j = 1:length(omega)
-        integral = trapz(omega, P_omega .* circshift(P_omega, [i-1, 0]) .* circshift(P_omega, [j-1, 0]));
-        JSA(i, j) = integral;
-    end
-end
-
-% Set threshold for high-intensity spots
-threshold = 0.8 * max(JSA(:)); % Adjust threshold as needed
-
-% Plot JSA with high-intensity spots
-figure;
-hold on;
-for i = 1:length(omega)
-    for j = 1:length(omega)
-        if JSA(i, j) >= threshold
-            plot(omega(i), omega(j), 'k.', 'MarkerSize', 10); % Plot high-intensity spot
-        end
-    end
-end
-xlabel('\omega_1 (Hz)');
-ylabel('\omega_2 (Hz)');
-title('High-Intensity Spots in Joint Spectral Amplitude (JSA)');
