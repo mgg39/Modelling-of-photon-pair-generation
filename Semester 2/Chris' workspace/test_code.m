@@ -20,8 +20,8 @@ Zmax = max(z)/100;  %Defining Zmax as the length of the waveguide (converting fr
 
 %% 
 
-wi = linspace(1.34e15, 1.37e15, 2000); 
-ws = linspace(1.146e15, 1.166e15, 2000);
+wi = linspace(1.3445e15, 1.3665e15, N); 
+ws = linspace(1.149e15, 1.163e15, N);
 
 wscan_photon=2*pi*c./(lscan_photon);
 
@@ -46,7 +46,8 @@ delta_beta = Beta_p - Beta_s - Beta_i;  %delta_beta = beta_p - beta_s - beta_i
 phi = sinc(delta_beta, Zmax);
 
 w0=2*pi*c/750e-9;
-alpha=exp(-(Ws+Wi-w0).^2*0.25e-24/2);
+%alpha=exp(-(Ws+Wi-w0).^2/w_half^2);
+alpha = exp(-(Ws+Wi-w0).^2*0.25e-24/2);
 
 %% Plotting
 
@@ -86,7 +87,7 @@ trap = interp1(freqs, interp1(z, P_shift, 0), Wp).*0.5*dz + interp1(freqs, inter
 %dummy_trap = alpha.*0.5*dz + alpha.*exp(1i*delta_beta.*Zmax)*0.5*dz;
 
 for c=1:N-1
-    trap = trap + interp1(freqs, interp1(z, P_shift, dz*c), Wp).*exp(1i*delta_beta.*dz*c)*dz;
+    trap = trap + interp1(freqs, interp1(z, P_shift, dz*c), Wp).*exp(1i*delta_beta.*dz*c)*dz; %
     %dummy_trap = dummy_trap + alpha.*exp(1i*delta_beta.*dz*c)*dz;
 end
 
@@ -96,7 +97,7 @@ pcolor(Ws,Wi,abs(trap));
 shading interp;
 xlabel('\omega_s (Hz)');
 ylabel('\omega_i (Hz)');
-title('Integral');
+title('JSA');
 colorbar
 
 %% Timer
