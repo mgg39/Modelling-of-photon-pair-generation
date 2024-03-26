@@ -3,7 +3,7 @@ clc
 
 tic;
 
-T = 320; % time domain width
+T = 3200; % time domain width
 N = 2048; % N discretization points
 dt = T/N; 
 t = [-T/2 : dt : T/2 - dt]'; % time domain in ps (ps determined by constants)
