@@ -3,7 +3,7 @@ clc
 
 tic;  %Start of timer
 
-T = 320; % time domain width
+T = 500; % time domain width
 N = 2048; % N discretization points
 dt = T/N; 
 t = [-T/2 : dt : T/2 - dt]'; % time domain in ps (ps determined by constants)
@@ -29,15 +29,15 @@ u0=zeros(3*N, 1); %Defining an array to represent all pulses together
                   %F pulse represented by first N points, S represented by
                   %N+1 to 2N point, P represented by 2N+1 to 3N points
 
-pulsewidth = 20;                    %Pulse width of laser (timeframe already scale to ps with constants)
-A = 0.25;                              %Amplitude of laser pulse in kiloWatts (kW scaled by constants)
+pulsewidth = 25;                    %Pulse width of laser (timeframe already scale to ps with constants)
+A = 1;                              %Amplitude of laser pulse in kiloWatts (kW scaled by constants)
 ratio = 2*asech(1/2)/pulsewidth;     %Finding the ratio between the desired pulsewidth and FWHM of a sech curve to scale t by
 
 u0(1:N) = sqrt(A)*sech(t*ratio); %*(1+1i)/sqrt(2);
 
 %Other pulses remain at 0 for initial conditions
 
-opts = odeset('RelTol',1e-2,'AbsTol',1e-4);
+opts = odeset('RelTol',1e-4,'AbsTol',1e-6);
  
 %% Damage threshold
 
@@ -61,8 +61,10 @@ if ((E/face) > D_T)
 end
 
 %% Fourier Frequency domain
-zend = 13*T/(256*Beta_f1);  %Scaling the length of the waveguide wrt to T and Beta_f1
+zend = 2.885/C;  %Scaling the length of the waveguide wrt C
 z = [0:zend/(N-1):zend]'; % Spacial domain in cm (cm determined by contsants)
+
+t_span = zend*Beta_f1*2; %setting a range of t to display the plots over
 
 [z, uhat] = ode45(@(z, uhat) CoupledPDEs(z,uhat,N,delta,Beta_f1,Beta_f2,Beta_s1,Beta_s2,Beta_p1,Beta_p2,kappa,gamma,C), z, u0, opts);
 
@@ -81,7 +83,7 @@ hold on
 %plot(Beta_f1*z, z, 'k-', Beta_s1*z, z, 'k--')
 hold off
 xlabel('t(ps)')
-xlim([[-pulsewidth 3*pulsewidth]])
+xlim([-t_span*3/4 t_span*5/4])
 ylabel('z(cm)')
 colorbar
 %caxis([0 1])
@@ -96,7 +98,7 @@ hold on
 %plot(Beta_f1*z, z, 'w-', Beta_s1*z, z, 'w--')
 hold off
 xlabel('t(ps)')
-xlim([[-pulsewidth 3*pulsewidth]])
+xlim([-t_span*3/4 t_span*5/4])
 ylabel('z(cm)')
 colorbar
 ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
@@ -110,7 +112,7 @@ hold on
 %plot(Beta_f1*z, z, 'w-', Beta_s1*z, z, 'w--')
 hold off
 xlabel('t(ps)')
-xlim([[-pulsewidth 3*pulsewidth]])
+xlim([-t_span*3/4 t_span*5/4])
 ylabel('z(cm)')
 colorbar
 ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
