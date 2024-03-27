@@ -31,13 +31,66 @@ gamma = 10^1.5; %Units in 1/(cm*sqrt(kW))
 
 c0 = 299792458; %Speed of light
 
-for J1=1:5
-    for J2=1:5
-        for J3=1:5
+N = 2048; % N discretization points
+
+
+u0=zeros(3*N, 1); %Defining an array to represent all pulses together
+                  %F pulse represented by first N points, S represented by
+                  %N+1 to 2N point, P represented by 2N+1 to 3N points
+
+pulsewidth = 25;                    %Pulse width of laser (timeframe already scale to ps with constants)
+ratio = 2*asech(1/2)/pulsewidth;     %Finding the ratio between the desired pulsewidth and FWHM of a sech curve to scale t by
+
+
+opts = odeset('RelTol',1e-4,'AbsTol',1e-6);  %Setting the tolerance for ode45
+
+
+D_T = 14e-3;  %Damage threshold of LiNbO3, units of kJ/cm^2
+w = 664e-7;    %Width of waveguide in cm
+h = 330e-7;    %Height of waveguide in cm
+theta = 70;    %Slant of waveguide wall in degrees
+
+face = w*h + h^2/tan(theta); %Area of waveguide face in cm^2
+
+max_PA = (D_T*face*ratio*10^12/pi)^2;  %Maximum allowed pulse strength for selected pulsewidth without damaging crystal
+
+
+load("photon_disp.mat"); %Data for singal and idler photons
+lscan_photon = lamscan; neff_photon=neff;   
+lscan_photon=lscan_photon*10^-6;   %Converting from um to m
+
+load("pump_disp.mat"); lscan_pump = lamscan; neff_pump=neff; %Data for pump pulse 
+lscan_pump=lscan_pump*10^-6;   %Converting from um to m
+           
+wi = linspace(1.350e15, 1.361e15, N); %Setting range of omega for idler photons
+ws = linspace(1.153e15, 1.159e15, N); %Setting range of omega for signal photons
+
+wscan_photon=2*pi*c0./(lscan_photon);
+
+ns=spline(wscan_photon,neff_photon,ws);  %using spline to get range of neff that follow same relation between neff_photon and wscan_photon
+ni=spline(wscan_photon,neff_photon,wi);  
+
+wscan_pump=2*pi*c0./(lscan_pump); 
+
+[Ws,Wi] = meshgrid(ws,wi);     %Converting arrays to meshgrids
+[Ns, Ni] = meshgrid(ns, ni);   %Ws vertical, Wi horizontal
+Wp = Ws + Wi;                  %freq_p = freq_s + freq_i
+
+Np = spline(wscan_pump,neff_pump,Wp);   %using spline to get range of neff that follow same relation between neff_pump and wscan_pump
+
+Beta_s = Ws.*Ns./c0;   %beta = n*w/c
+Beta_i = Wi.*Ni./c0; 
+Beta_p = Wp.*Np./c0;   %calculating beta values for all 3 pulses
+
+delta_beta = Beta_p - Beta_s - Beta_i;  %delta_beta = beta_p - beta_s - beta_i
+
+
+for J1=1:5   %Nested for loop over values of C
+    for J2=1:5   %Nested for loop over values of T
+        for J3=1:5   %Nested for loop over values of A
 
             w0=2*pi*c0/lambda;
 
-            N = 2048; % N discretization points
             dt = T(J2)/N; 
             t = [-T(J2)/2 : dt : T(J2)/2 - dt]'; % time domain in ps (ps determined by constants)
 
@@ -45,102 +98,34 @@ for J1=1:5
             delta = fftshift(delta);
 
 %% Initial conditions
-
-            u0=zeros(3*N, 1); %Defining an array to represent all pulses together
-                  %F pulse represented by first N points, S represented by
-                  %N+1 to 2N point, P represented by 2N+1 to 3N points
-
-            pulsewidth = 25;                    %Pulse width of laser (timeframe already scale to ps with constants)
-            ratio = 2*asech(1/2)/pulsewidth;     %Finding the ratio between the desired pulsewidth and FWHM of a sech curve to scale t by
-
             u0(1:N) = sqrt(A(J3))*sech(t*ratio); %*(1+1i)/sqrt(2);
-
-%Other pulses remain at 0 for initial conditions
-
-            opts = odeset('RelTol',1e-4,'AbsTol',1e-6);
+            %Other pulses remain at 0 for initial conditions
  
 %% Damage threshold
 
-            D_T = 14e-3;  %Damage threshold of LiNbO3, units of kJ/cm^2
-            w = 664e-7;    %Width of waveguide in cm
-            h = 330e-7;    %Height of waveguide in cm
-            theta = 70;    %Slant of waveguide wall in degrees
-
-            face = w*h + h^2/tan(theta); %Area of waveguide face in cm^2
-
-%Integral of a*sech(b*x) from -ininifty to infinity= a*pi/b
+            %Integral of a*sech(b*x) from -ininifty to infinity= a*pi/b
             E = sqrt(A(J3))*pi/(ratio*10^12);
 
-            max_PW = 2*asech(1/2)*D_T*face/(pi*sqrt(A(J3))*10^-12);           %Maximum allowed pulsewidth for selected pulse strength without damaging crystal
-            max_PA = (D_T*face*ratio*10^12/pi)^2;  %Maximum allowed pulse strength for selected pulsewidth without damaging crystal
+            max_PW = 2*asech(1/2)*D_T*face/(pi*sqrt(A(J3))*10^-12);    
+            %Maximum allowed pulsewidth for selected pulse strength without damaging crystal
 
-            if ((E/face) > D_T)
+            if ((E/face) > D_T) %Recommended changes to not breach damage threshold
                 fprintf("The input laser has exceeded the damage threshold of Lithium Niobate \n")
                 fprintf("Try changing the pulsewidth to be less than %.3f ps or the pulse strength to be less than %.3f kW \n", max_PW, max_PA)
                 stop
             end
 
 %% Fourier Frequency domain
+
             zend = 2.885/C(J1);  %Scaling the length of the waveguide wrt C (linear coupling co-eff)
             z = [0:zend/(N-1):zend]'; % Spacial domain in cm (cm determined by contsants)
 
-            t_span = zend*Beta_f1*4; %setting a range of t to display the plots over
-
             [z, uhat] = ode45(@(z, uhat) CoupledPDEs(z,uhat,N,delta,Beta_f1,Beta_f2,Beta_s1,Beta_s2,Beta_p1,Beta_p2,kappa,gamma,C(J1)), z, u0, opts);
+            %ode45 uses Runge-Kutta 4th and 5th order
 
             u1 = uhat(:,1:N);       %Breaking apart final matrix into 3 respective pulses
             u2 = uhat(:,N+1:2*N);
             u3 = uhat(:,2*N+1:3*N);
-
-
-%% Plot
-
-            if (PLOT == true)
-                figure;
-
-                subplot(1,3,1)         %Plotting F pulse propagation
-                pcolor(t,z,abs(u1).^2)
-                shading interp
-                hold on
-                %plot(Beta_f1*z, z, 'k-', Beta_s1*z, z, 'k--')
-                hold off
-                xlabel('t(ps)')
-                xlim([-t_span*3/4 t_span*5/4])
-                ylabel('z(cm)')
-                colorbar
-                %caxis([0 1])
-                ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
-                title("F")
-                set(gca,'TickDir','out'); 
-
-                subplot(1,3,2)         %Plotting S pulse propagation
-                pcolor(t,z,abs(u2).^2)
-                shading interp
-                hold on
-                %plot(Beta_f1*z, z, 'w-', Beta_s1*z, z, 'w--')
-                hold off
-                xlabel('t(ps)')
-                xlim([-t_span*3/4 t_span*5/4])
-                ylabel('z(cm)')
-                colorbar
-                ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
-                title("S")
-                set(gca,'TickDir','out'); 
-
-                subplot(1,3,3)          %Plotting P pulse propagation
-                pcolor(t,z,abs(u3).^2)
-                shading interp
-                hold on
-                %plot(Beta_f1*z, z, 'w-', Beta_s1*z, z, 'w--')
-                hold off
-                xlabel('t(ps)')
-                xlim([-t_span*3/4 t_span*5/4])
-                ylabel('z(cm)')
-                colorbar
-                ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
-                title("P")
-                set(gca,'TickDir','out'); 
-            end
 
 %% Converting P(z, t) to P(z, w)
 
@@ -149,132 +134,25 @@ for J1=1:5
 
             freqs = fftshift(delta);
             freqs = freqs*1e12 + w0;  %Scaling frequency range to be centred around omega_0
-
-            if (PLOT == true)
-                figure
-
-                subplot(1,3,1)
-                pcolor(freqs,z,abs(P_shift).^2)   %Plotting the FT(P) pulse
-                shading interp
-                hold on
-                xline(w0, 'w--')   %Plotting a vertical line at w_0 to observe the offset of the frequencies
-                hold off
-                xlabel('\omega (Hz)')
-                xlim([2.5105e15 2.5125e15])
-                ylabel('z (cm)')
-                colorbar
-                ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
-                title("P(z, \omega)")
-                set(gca,'TickDir','out'); 
-
-                subplot(1,3,2)
-                pcolor(freqs,z,real(P_shift))   %Plotting the RE[FT(P)] pulse
-                shading interp
-                hold on
-                xline(w0, 'w--')   %Plotting a vertical line at 0 to observe the offset of teh frequencies
-                hold off
-                xlabel('\omega (Hz)')
-                xlim([2.5105e15 2.5125e15])
-                ylabel('z (cm)')
-                colorbar
-                ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
-                title("Re[P(z, \omega)]")
-                set(gca,'TickDir','out'); 
-
-                subplot(1,3,3)
-                pcolor(freqs,z,imag(P_shift))   %Plotting the Im[FT(P)] pulse
-                shading interp
-                hold on
-                xline(w0, 'w--')   %Plotting a vertical line at 0 to observe the offset of teh frequencies
-                hold off
-                xlabel('\omega (Hz)')
-                xlim([2.5105e15 2.5125e15])
-                ylabel('z (cm)')
-                colorbar
-                ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
-                title("Im[P(z, \omega)]")
-                set(gca,'TickDir','out'); 
-            end
-
+              
 %% Peak finder
 
             [Pmax,Idx] = max(abs(u3(:)).^2);
             [PmaxRow,PmaxCol] = ind2sub(size(abs(u3).^2), Idx);   %Finding the maximum of P(z,t)
-            Zmax = z(PmaxRow);
-            Tmax = t(PmaxCol);
+            Zmax = z(PmaxRow); Tmax = t(PmaxCol);
 
-            fprintf("For an input laser of power %.2f kW and pulsewidth %.1d ps, the Pump pulse has a maximum amplitude of %.2d kW at z = %.2d cm and t = %.1d ps\n", A(J3), pulsewidth, Pmax, Zmax, Tmax)
-
-            [PmaxW,IdxW] = max(abs(P_shift(:)).^2);
-            [PmaxWRow,PmaxWCol] = ind2sub(size(abs(P_shift).^2),IdxW);  %Finding the maximum of P(z,omega)
-
-            if (PLOT == true)
-                figure
-                subplot(1,2,1)
-                plot(freqs, real(P_shift(PmaxWRow,:)))   %Plotting real and imaginary parts of P(z,omega) to observe fine structure
-                xlim([2.5105e15 2.5125e15])
-                subplot(1,2,2)
-                plot(freqs, imag(P_shift(PmaxWRow,:)))
-                xlim([2.5105e15 2.5125e15])
-            end
-
-%% Loading photon data
-
-            load("photon_disp.mat"); %Data for i and s pulses
-            lscan_photon = lamscan; neff_photon=neff;   
-            lscan_photon=lscan_photon*10^-6;   %Converting from um to m
-
-            load("pump_disp.mat"); lscan_pump = lamscan; neff_pump=neff; %Data for pump pulse 
-            lscan_pump=lscan_pump*10^-6;   %Converting from um to m
-        
-%% Creating meshgrids
-
-            wi = linspace(1.350e15, 1.361e15, N); 
-            ws = linspace(1.153e15, 1.159e15, N);
-
-            wscan_photon=2*pi*c0./(lscan_photon);
-
-            ns=spline(wscan_photon,neff_photon,ws);  %using spline to get range of neff that follow same relation between neff_photon and wscan_photon
-            ni=spline(wscan_photon,neff_photon,wi);  
-
-            wscan_pump=2*pi*c0./(lscan_pump); 
-
-            [Ws,Wi] = meshgrid(ws,wi);     %Converting arrays to meshgrids
-            [Ns, Ni] = meshgrid(ns, ni);   %Ws vertical, Wi horizontal
-            Wp = Ws + Wi;                  %freq_p = freq_s + freq_i
-
-            Np = spline(wscan_pump,neff_pump,Wp);   %using spline to get range of neff that follow same relation between neff_pump and wscan_pump
-
-%% Calculating betas
-
-            Beta_s = Ws.*Ns./c0;   %beta = n*w/c
-            Beta_i = Wi.*Ni./c0; 
-            Beta_p = Wp.*Np./c0;   %calculating beta values for all 3 pulses
-
-            delta_beta = Beta_p - Beta_s - Beta_i;  %delta_beta = beta_p - beta_s - beta_i
-
+            %fprintf("For an input laser of power %.2f kW and pulsewidth %.1d ps, the Pump pulse has a maximum amplitude of %.2d kW at z = %.2d cm and t = %.1d ps\n", A(J3), pulsewidth, Pmax, Zmax, Tmax)
+      
 %% Integration
 
-            zend = zend/100;
+            zend = zend/100; %converting from cm to m
             dz = zend/N;
 
             trap = interp1(freqs, interp1(z, P_shift, 0), Wp).*0.5*dz + interp1(freqs, interp1(z, P_shift, zend), Wp).*exp(1i*delta_beta.*zend)*0.5*dz;
+            %using trapezium method for integration
 
             for c=1:N-1
                 trap = trap + interp1(freqs, interp1(z, P_shift, dz*c), Wp).*exp(1i*delta_beta.*dz*c)*dz; 
-            end
-
-            if (PLOT==true)
-                figure
-                pcolor(Ws,Wi,abs(trap).^2);
-                shading interp;
-                hold on
-                %plot(ws, w0-ws, 'w--')
-                hold off
-                xlabel('\omega_s (Hz)');
-                ylabel('\omega_i (Hz)');
-                title('JSI');
-                colorbar
             end
 
 %% Purity
@@ -283,10 +161,10 @@ for J1=1:5
 
             svdamp = svds(trap, j);
             prob = (svdamp).^2 / ((svdamp)' * (svdamp));
-            p = sum(prob.^2);   % purity
+            p = sum(prob.^2);   %calculating purity of JSI by splitting it into j functions
 
             diff = 1;
-            while diff>0.001
+            while diff>0.001  %Repeating with increasing j until difference from last iteration below threshold
                 j = j + 1;
                 svdamp = svds(trap, j);
                 prob = (svdamp).^2 / ((svdamp)' *(svdamp));
@@ -295,23 +173,13 @@ for J1=1:5
                 diff = p(j-1) - p(j);
             end
 
-            if (PLOT == true)
-                figure
-                plot(p)
-                title(['P = ', num2str(p(j)), ', j = ', num2str(j)])
-                xlabel('Number of funcitons decomposed into (j)')
-                ylabel('Purity')
-                xlim([0 j])
-                ylim([0 1])
-            end
-
-            Purity(J1, J2, J3) = p(j);
+            Purity(J1, J2, J3) = p(j);  %Purity of this set of parameters is the last calculated
         end
     end
 end
 
-[maxP, Index] = max(Purity(:));
-[CIndex, TIndex, AIndex] = ind2sub(size(Purity), Index);
+[maxP, Index] = max(Purity(:));  %Finding the highest purity
+[CIndex, TIndex, AIndex] = ind2sub(size(Purity), Index); %Finding the parameters corresponding to highest purity
 
 disp('The highest purity is p = ', num2str(maxP), ' with the constants C = ', num2str(C(CIndex)), ' 1/cm, T = ', num2str(T(TIndex)), 'ps and A = ', num2str(A(AIndex)), 'kW')
 
