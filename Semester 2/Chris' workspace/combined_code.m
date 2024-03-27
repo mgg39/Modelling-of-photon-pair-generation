@@ -3,14 +3,15 @@ clc
 
 tic;  %Start of timer
 
+
 %% Variales to tune
 
 T = 600; % time domain width
-C = 2; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
-A = 1;                              %Amplitude of laser pulse in kiloWatts (kW scaled by constants)
+C = 1; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
+A = 2;                              %Amplitude of laser pulse in kiloWatts (kW scaled by constants)
 lambda = 750*10^-9;  %Wavelength of P photons
 
-PLOT = true;
+PLOT = false;
 
 %% Constants
 Beta_f2 = 0.83e-2; %Units in ps^2/cm
@@ -24,6 +25,8 @@ kappa =  6.9e3; %Units in 1/cm
 gamma = 10^1.5; %Units in 1/(cm*sqrt(kW))
 
 c0 = 299792458; %Speed of light
+
+
 w0=2*pi*c0/lambda;
 
 N = 2048; % N discretization points
@@ -49,7 +52,6 @@ u0(1:N) = sqrt(A)*sech(t*ratio); %*(1+1i)/sqrt(2);
 opts = odeset('RelTol',1e-4,'AbsTol',1e-6);
  
 %% Damage threshold
-
 D_T = 14e-3;  %Damage threshold of LiNbO3, units of kJ/cm^2
 w = 664e-7;    %Width of waveguide in cm
 h = 330e-7;    %Height of waveguide in cm
@@ -73,7 +75,7 @@ end
 zend = 2.885/C;  %Scaling the length of the waveguide wrt C (linear coupling co-eff)
 z = [0:zend/(N-1):zend]'; % Spacial domain in cm (cm determined by contsants)
 
-t_span = zend*Beta_f1*2; %setting a range of t to display the plots over
+t_span = zend*Beta_f1*4; %setting a range of t to display the plots over
 
 [z, uhat] = ode45(@(z, uhat) CoupledPDEs(z,uhat,N,delta,Beta_f1,Beta_f2,Beta_s1,Beta_s2,Beta_p1,Beta_p2,kappa,gamma,C), z, u0, opts);
 
@@ -275,7 +277,7 @@ prob = (svdamp).^2 / ((svdamp)' * (svdamp));
 p = sum(prob.^2);   % purity
 
 diff = 1;
-while diff>0.0001
+while diff>0.001
     j = j + 1;
     svdamp = svds(trap, j);
     prob = (svdamp).^2 / ((svdamp)' *(svdamp));
@@ -291,7 +293,6 @@ xlabel('Number of funcitons decomposed into (j)')
 ylabel('Purity')
 xlim([0 j])
 ylim([0 1])
-
 
 %% Timer
 
