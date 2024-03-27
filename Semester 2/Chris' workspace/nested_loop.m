@@ -60,29 +60,10 @@ lscan_photon = lamscan; neff_photon=neff;
 lscan_photon=lscan_photon*10^-6;   %Converting from um to m
 
 load("pump_disp.mat"); lscan_pump = lamscan; neff_pump=neff; %Data for pump pulse 
-lscan_pump=lscan_pump*10^-6;   %Converting from um to m
-           
-wi = linspace(1.350e15, 1.361e15, N); %Setting range of omega for idler photons
-ws = linspace(1.153e15, 1.159e15, N); %Setting range of omega for signal photons
+lscan_pump=lscan_pump*10^-6;   %Converting from um to m         
 
 wscan_photon=2*pi*c0./(lscan_photon);
-
-ns=spline(wscan_photon,neff_photon,ws);  %using spline to get range of neff that follow same relation between neff_photon and wscan_photon
-ni=spline(wscan_photon,neff_photon,wi);  
-
 wscan_pump=2*pi*c0./(lscan_pump); 
-
-[Ws,Wi] = meshgrid(ws,wi);     %Converting arrays to meshgrids
-[Ns, Ni] = meshgrid(ns, ni);   %Ws vertical, Wi horizontal
-Wp = Ws + Wi;                  %freq_p = freq_s + freq_i
-
-Np = spline(wscan_pump,neff_pump,Wp);   %using spline to get range of neff that follow same relation between neff_pump and wscan_pump
-
-Beta_s = Ws.*Ns./c0;   %beta = n*w/c
-Beta_i = Wi.*Ni./c0; 
-Beta_p = Wp.*Np./c0;   %calculating beta values for all 3 pulses
-
-delta_beta = Beta_p - Beta_s - Beta_i;  %delta_beta = beta_p - beta_s - beta_i
 
 
 for J1=1:5   %Nested for loop over values of C
@@ -143,6 +124,28 @@ for J1=1:5   %Nested for loop over values of C
 
             %fprintf("For an input laser of power %.2f kW and pulsewidth %.1d ps, the Pump pulse has a maximum amplitude of %.2d kW at z = %.2d cm and t = %.1d ps\n", A(J3), pulsewidth, Pmax, Zmax, Tmax)
       
+%% 
+
+            w_span = N*10^12/(3*T*sqrt(2));
+
+            wi = linspace(1.1562e15-w_span, 1.1562e15+w_span, N); %Setting range of omega for idler photons
+            ws = linspace(1.3553e15-w_span, 1.3553e15+w_span, N); %Setting range of omega for signal photons
+
+            ns=spline(wscan_photon,neff_photon,ws);  %using spline to get range of neff that follow same relation between neff_photon and wscan_photon
+            ni=spline(wscan_photon,neff_photon,wi);  
+
+            [Ws,Wi] = meshgrid(ws,wi);     %Converting arrays to meshgrids
+            [Ns, Ni] = meshgrid(ns, ni);   %Ws vertical, Wi horizontal
+            Wp = Ws + Wi;                  %freq_p = freq_s + freq_i
+
+            Np = spline(wscan_pump,neff_pump,Wp);   %using spline to get range of neff that follow same relation between neff_pump and wscan_pump
+
+            Beta_s = Ws.*Ns./c0;   %beta = n*w/c
+            Beta_i = Wi.*Ni./c0; 
+            Beta_p = Wp.*Np./c0;   %calculating beta values for all 3 pulses
+
+            delta_beta = Beta_p - Beta_s - Beta_i;  %delta_beta = beta_p - beta_s - beta_i
+
 %% Integration
 
             zend = zend/100; %converting from cm to m
@@ -157,7 +160,9 @@ for J1=1:5   %Nested for loop over values of C
 
 %% Purity
 
-            j = 1;
+            disp('Current parameters: C = ', C(J1), ', T = ', T(J2), ', A = ', A(J3))
+
+            j = 2;
 
             svdamp = svds(trap, j);
             prob = (svdamp).^2 / ((svdamp)' * (svdamp));
@@ -186,4 +191,6 @@ disp('The highest purity is p = ', num2str(maxP), ' with the constants C = ', nu
 %% Timer
 
 elapsed_time = toc;
-disp(['Elapsed time: ', num2str(elapsed_time), ' seconds']);
+mins = floor(elapsed_time/60);
+secs = rem(elapsed_time, 60);
+disp(['Elapsed time: ', num2str(mins), ' minutes and ', num2str(secs), ' seconds']);

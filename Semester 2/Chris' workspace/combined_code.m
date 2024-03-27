@@ -6,9 +6,9 @@ tic;  %Start of timer
 
 %% Variales to tune
 
-T = 600; % time domain width
-C = 1; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
-A = 2;                              %Amplitude of laser pulse in kiloWatts (kW scaled by constants)
+T = 700; % time domain width
+C = 2; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
+A = 2; %Amplitude of laser pulse in kiloWatts (kW scaled by constants)
 lambda = 750*10^-9;  %Wavelength of P photons
 
 PLOT = false;
@@ -297,4 +297,6 @@ ylim([0 1])
 %% Timer
 
 elapsed_time = toc;
-disp(['Elapsed time: ', num2str(elapsed_time), ' seconds']);
+mins = floor(elapsed_time/60);
+secs = rem(elapsed_time, 60);
+disp(['Elapsed time: ', num2str(mins), ' minutes and ', num2str(secs), ' seconds']);
