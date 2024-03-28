@@ -6,12 +6,12 @@ tic;  %Start of timer
 
 %% Variales to tune
 
-T = 700; % time domain width
-C = 2; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
-A = 2; %Amplitude of laser pulse in kiloWatts (kW scaled by constants)
+T = 1000; % time domain width
+C = 1; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
+A = 1; %Amplitude of laser pulse in kiloWatts (kW scaled by constants)
 lambda = 750*10^-9;  %Wavelength of P photons
 
-PLOT = false;
+PLOT = true;
 
 %% Constants
 Beta_f2 = 0.83e-2; %Units in ps^2/cm
@@ -42,7 +42,7 @@ u0=zeros(3*N, 1); %Defining an array to represent all pulses together
                   %F pulse represented by first N points, S represented by
                   %N+1 to 2N point, P represented by 2N+1 to 3N points
 
-pulsewidth = 25;                    %Pulse width of laser (timeframe already scale to ps with constants)
+pulsewidth = 20;                    %Pulse width of laser (timeframe already scale to ps with constants)
 ratio = 2*asech(1/2)/pulsewidth;     %Finding the ratio between the desired pulsewidth and FWHM of a sech curve to scale t by
 
 u0(1:N) = sqrt(A)*sech(t*ratio); %*(1+1i)/sqrt(2);
@@ -220,8 +220,10 @@ lscan_pump=lscan_pump*10^-6;   %Converting from um to m
 
 %% Creating meshgrids
 
-wi = linspace(1.350e15, 1.361e15, N); 
-ws = linspace(1.153e15, 1.159e15, N);
+w_span = 2*N*10^12/(T*sqrt(2));
+
+wi = linspace(1.1562e15-w_span, 1.1562e15+w_span, N); %Setting range of omega for idler photons
+ws = linspace(1.3553e15-w_span, 1.3553e15+w_span, N); %Setting range of omega for signal photons
 
 wscan_photon=2*pi*c0./(lscan_photon);
 

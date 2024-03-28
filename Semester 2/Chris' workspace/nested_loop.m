@@ -6,15 +6,17 @@ tic;  %Start of timer
 
 %% Variales to tune
 
-%T = 600; % time domain width
-%C = 1; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
-%A = 2;                              %Amplitude of laser pulse in kiloWatts (kW scaled by constants)
 lambda = 750*10^-9;  %Wavelength of P photons
 
-C = linspace(0.1, 2, 5);
-T = linspace(400, 800, 5);
-A = linspace(0.1, 2, 5);
-Purity = zeros(5, 5, 5);
+I1 = 5; %Number of C varialbes being tested
+I2 = 5; %Number of T variables being tested
+I3 = 5; %Number of A variables being tested 
+
+C = linspace(0.1, 2.5, I1);
+T = linspace(500, 2500, I2);
+A = linspace(0.1, 3.2, I3);
+
+Purity = zeros(I1, I2, I3);
 
 PLOT = false;
 
@@ -38,7 +40,7 @@ u0=zeros(3*N, 1); %Defining an array to represent all pulses together
                   %F pulse represented by first N points, S represented by
                   %N+1 to 2N point, P represented by 2N+1 to 3N points
 
-pulsewidth = 25;                    %Pulse width of laser (timeframe already scale to ps with constants)
+pulsewidth = 20;                    %Pulse width of laser (timeframe already scale to ps with constants)
 ratio = 2*asech(1/2)/pulsewidth;     %Finding the ratio between the desired pulsewidth and FWHM of a sech curve to scale t by
 
 
@@ -126,7 +128,7 @@ for J1=1:5   %Nested for loop over values of C
       
 %% 
 
-            w_span = N*10^12/(3*T*sqrt(2));
+            w_span = 2*N*10^12/(T(J2)*sqrt(2));
 
             wi = linspace(1.1562e15-w_span, 1.1562e15+w_span, N); %Setting range of omega for idler photons
             ws = linspace(1.3553e15-w_span, 1.3553e15+w_span, N); %Setting range of omega for signal photons
@@ -162,7 +164,7 @@ for J1=1:5   %Nested for loop over values of C
 
             disp('Current parameters: C = ', C(J1), ', T = ', T(J2), ', A = ', A(J3))
 
-            j = 2;
+            j = 1;
 
             svdamp = svds(trap, j);
             prob = (svdamp).^2 / ((svdamp)' * (svdamp));
