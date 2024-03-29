@@ -12,13 +12,11 @@ I1 = 5; %Number of C varialbes being tested
 I2 = 5; %Number of T variables being tested
 I3 = 5; %Number of A variables being tested 
 
-C = linspace(0.1, 2.5, I1);
-T = linspace(500, 2500, I2);
-A = linspace(0.1, 3.2, I3);
+C = linspace(0.1, 2.5, I1);  %Range of C values to test
+T = linspace(500, 2500, I2); %Range of T values to test
+A = linspace(0.1, 3.2, I3);  %Range of A values to test
 
-Purity = zeros(I1, I2, I3);
-
-PLOT = false;
+Purity = zeros(I1, I2, I3);  %Empty 3d array for purity values
 
 %% Constants
 Beta_f2 = 0.83e-2; %Units in ps^2/cm
@@ -185,10 +183,10 @@ for J1=1:5   %Nested for loop over values of C
     end
 end
 
-[maxP, Index] = max(Purity(:));  %Finding the highest purity
+[maxPur, Index] = max(Purity(:));  %Finding the highest purity
 [CIndex, TIndex, AIndex] = ind2sub(size(Purity), Index); %Finding the parameters corresponding to highest purity
 
-disp('The highest purity is p = ', num2str(maxP), ' with the constants C = ', num2str(C(CIndex)), ' 1/cm, T = ', num2str(T(TIndex)), 'ps and A = ', num2str(A(AIndex)), 'kW')
+disp('The highest purity is p = ', num2str(maxPur), ' with the constants C = ', num2str(C(CIndex)), ' 1/cm, T = ', num2str(T(TIndex)), 'ps and A = ', num2str(A(AIndex)), 'kW')
 
 %% Timer
 
