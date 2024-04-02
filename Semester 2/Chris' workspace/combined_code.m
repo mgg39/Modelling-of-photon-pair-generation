@@ -6,10 +6,10 @@ tic;  %Start of timer
 
 %% Variales to tune
 
-T = 1000; % time domain width
-C = 1; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
+T = 500; % time domain width
+C = 0.7; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
 A = 1; %Amplitude of laser pulse in kiloWatts (kW scaled by constants)
-lambda = 750*10^-9;  %Wavelength of P photons
+lambda = 749*10^-9;  %Wavelength of P photons
 
 PLOT = true;
 
@@ -141,6 +141,8 @@ P_shift = fftshift(P,2);           %Shifting P so that omega=0 is centred
 freqs = fftshift(delta);
 freqs = freqs*1e12 + w0;  %Scaling frequency range to be centred around omega_0
 
+freqs_range = (max(freqs) - min(freqs))/2;
+
 if (PLOT == true)
     figure
 
@@ -151,7 +153,7 @@ if (PLOT == true)
     xline(w0, 'w--')   %Plotting a vertical line at w_0 to observe the offset of the frequencies
     hold off
     xlabel('\omega (Hz)')
-    xlim([2.5105e15 2.5125e15])
+    xlim([w0-freqs_range w0+freqs_range])
     ylabel('z (cm)')
     colorbar
     ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
@@ -165,7 +167,7 @@ if (PLOT == true)
     xline(w0, 'w--')   %Plotting a vertical line at 0 to observe the offset of teh frequencies
     hold off
     xlabel('\omega (Hz)')
-    xlim([2.5105e15 2.5125e15])
+    xlim([w0-freqs_range w0+freqs_range])
     ylabel('z (cm)')
     colorbar
     ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
@@ -179,7 +181,7 @@ if (PLOT == true)
     xline(w0, 'w--')   %Plotting a vertical line at 0 to observe the offset of teh frequencies
     hold off
     xlabel('\omega (Hz)')
-    xlim([2.5105e15 2.5125e15])
+    xlim([w0-freqs_range w0+freqs_range])
     ylabel('z (cm)')
     colorbar
     ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
@@ -203,10 +205,10 @@ if (PLOT == true)
     figure
     subplot(1,2,1)
     plot(freqs, real(P_shift(PmaxWRow,:)))   %Plotting real and imaginary parts of P(z,omega) to observe fine structure
-    xlim([2.5105e15 2.5125e15])
+    xlim([w0-freqs_range w0+freqs_range])
     subplot(1,2,2)
     plot(freqs, imag(P_shift(PmaxWRow,:)))
-    xlim([2.5105e15 2.5125e15])
+    xlim([w0-freqs_range w0+freqs_range])
 end
 
 %% Loading photon data
@@ -232,8 +234,8 @@ ni=spline(wscan_photon,neff_photon,wi);
 
 wscan_pump=2*pi*c0./(lscan_pump); 
 
-[Ws,Wi] = meshgrid(ws,wi);     %Converting arrays to meshgrids
-[Ns, Ni] = meshgrid(ns, ni);   %Ws vertical, Wi horizontal
+[Wi,Ws] = meshgrid(wi,ws);     %Converting arrays to meshgrids
+[Ni, Ns] = meshgrid(ni, ns);   %Ws vertical, Wi horizontal
 Wp = Ws + Wi;                  %freq_p = freq_s + freq_i
 
 Np = spline(wscan_pump,neff_pump,Wp);   %using spline to get range of neff that follow same relation between neff_pump and wscan_pump
@@ -259,10 +261,10 @@ end
 
 if (PLOT==true)
     figure
-    pcolor(Ws,Wi,abs(trap).^2);
+    pcolor(Wi,Ws,abs(trap).^2);
     shading interp;
     hold on
-    %plot(ws, w0-ws, 'w--')
+    plot(ws, w0-ws, 'w--')
     hold off
     xlabel('\omega_s (Hz)');
     ylabel('\omega_i (Hz)');

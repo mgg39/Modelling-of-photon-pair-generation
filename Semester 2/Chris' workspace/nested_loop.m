@@ -8,9 +8,9 @@ tic;  %Start of timer
 
 lambda = 750*10^-9;  %Wavelength of P photons
 
-I1 = 5; %Number of C varialbes being tested
-I2 = 5; %Number of T variables being tested
-I3 = 5; %Number of A variables being tested 
+I1 = 10; %Number of C varialbes being tested
+I2 = 10; %Number of T variables being tested
+I3 = 1; %Number of A variables being tested 
 
 C = linspace(0.1, 2.5, I1);  %Range of C values to test
 T = linspace(500, 2500, I2); %Range of T values to test
@@ -66,9 +66,9 @@ wscan_photon=2*pi*c0./(lscan_photon);
 wscan_pump=2*pi*c0./(lscan_pump); 
 
 
-for J1=1:5   %Nested for loop over values of C
-    for J2=1:5   %Nested for loop over values of T
-        for J3=1:5   %Nested for loop over values of A
+for J1=1:I1   %Nested for loop over values of C
+    for J2=1:I2   %Nested for loop over values of T
+        for J3=1:I3   %Nested for loop over values of A
 
             w0=2*pi*c0/lambda;
 
@@ -134,8 +134,8 @@ for J1=1:5   %Nested for loop over values of C
             ns=spline(wscan_photon,neff_photon,ws);  %using spline to get range of neff that follow same relation between neff_photon and wscan_photon
             ni=spline(wscan_photon,neff_photon,wi);  
 
-            [Ws,Wi] = meshgrid(ws,wi);     %Converting arrays to meshgrids
-            [Ns, Ni] = meshgrid(ns, ni);   %Ws vertical, Wi horizontal
+            [Wi,Ws] = meshgrid(wi,ws);     %Converting arrays to meshgrids
+            [Ni, Ns] = meshgrid(ni, ns);   %Ws vertical, Wi horizontal
             Wp = Ws + Wi;                  %freq_p = freq_s + freq_i
 
             Np = spline(wscan_pump,neff_pump,Wp);   %using spline to get range of neff that follow same relation between neff_pump and wscan_pump
