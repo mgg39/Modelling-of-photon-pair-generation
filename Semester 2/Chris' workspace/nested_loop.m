@@ -126,7 +126,7 @@ for J1=1:I1   %Nested for loop over values of C
       
 %% 
 
-            w_span = 2*N*10^12/(T(J2)*sqrt(2));
+            w_span = 3*N*10^12/(2*T(J2)*sqrt(2));
 
             wi = linspace(1.1562e15-w_span, 1.1562e15+w_span, N); %Setting range of omega for idler photons
             ws = linspace(1.3553e15-w_span, 1.3553e15+w_span, N); %Setting range of omega for signal photons
