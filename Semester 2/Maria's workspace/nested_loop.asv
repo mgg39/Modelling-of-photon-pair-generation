@@ -8,9 +8,9 @@ tic;  %Start of timer
 
 lambda = 750*10^-9;  %Wavelength of P photons
 
-I1 = 5; %Number of C varialbes being tested
-I2 = 5; %Number of T variables being tested
-I3 = 5; %Number of A variables being tested 
+I1 = 10; %Number of C varialbes being tested
+I2 = 10; %Number of T variables being tested
+I3 = 1; %Number of A variables being tested 
 
 C = linspace(0.1, 2.5, I1);  %Range of C values to test
 T = linspace(500, 2500, I2); %Range of T values to test
@@ -66,9 +66,9 @@ wscan_photon=2*pi*c0./(lscan_photon);
 wscan_pump=2*pi*c0./(lscan_pump); 
 
 
-for J1=1:5   %Nested for loop over values of C
-    for J2=1:5   %Nested for loop over values of T
-        for J3=1:5   %Nested for loop over values of A
+for J1=1:I1   %Nested for loop over values of C
+    for J2=1:I2   %Nested for loop over values of T
+        for J3=1:I3   %Nested for loop over values of A
 
             w0=2*pi*c0/lambda;
 
@@ -126,7 +126,7 @@ for J1=1:5   %Nested for loop over values of C
       
 %% 
 
-            w_span = 2*N*10^12/(T(J2)*sqrt(2));
+            w_span = 3*N*10^12/(2*T(J2)*sqrt(2));
 
             wi = linspace(1.1562e15-w_span, 1.1562e15+w_span, N); %Setting range of omega for idler photons
             ws = linspace(1.3553e15-w_span, 1.3553e15+w_span, N); %Setting range of omega for signal photons
@@ -134,8 +134,8 @@ for J1=1:5   %Nested for loop over values of C
             ns=spline(wscan_photon,neff_photon,ws);  %using spline to get range of neff that follow same relation between neff_photon and wscan_photon
             ni=spline(wscan_photon,neff_photon,wi);  
 
-            [Ws,Wi] = meshgrid(ws,wi);     %Converting arrays to meshgrids
-            [Ns, Ni] = meshgrid(ns, ni);   %Ws vertical, Wi horizontal
+            [Wi,Ws] = meshgrid(wi,ws);     %Converting arrays to meshgrids
+            [Ni, Ns] = meshgrid(ni, ns);   %Ws vertical, Wi horizontal
             Wp = Ws + Wi;                  %freq_p = freq_s + freq_i
 
             Np = spline(wscan_pump,neff_pump,Wp);   %using spline to get range of neff that follow same relation between neff_pump and wscan_pump
@@ -159,12 +159,9 @@ for J1=1:5   %Nested for loop over values of C
             end
 
 %% Purity
+            disp(['Current parameters: C = ', num2str(C(J1)), ', T = ', num2str(T(J2)), ', A = ', num2str(A(J3))]);
 
-            %disp('Current parameters: C = ', C(J1), ', T = ', T(J2), ', A = ', A(J3))
-            disp(['Current parameters: C = ', num2str(C(J1)), ', T = ', num2str(T(J2)), ', A = ', num2str(A(J3))])
-
-
-            j = 1;
+            j  b  = 1;
 
             svdamp = svds(trap, j);
             prob = (svdamp).^2 / ((svdamp)' * (svdamp));
@@ -188,9 +185,7 @@ end
 [maxPur, Index] = max(Purity(:));  %Finding the highest purity
 [CIndex, TIndex, AIndex] = ind2sub(size(Purity), Index); %Finding the parameters corresponding to highest purity
 
-%disp('The highest purity is p = ', num2str(maxPur), ' with the constants C = ', num2str(C(CIndex)), ' 1/cm, T = ', num2str(T(TIndex)), 'ps and A = ', num2str(A(AIndex)), 'kW')
-disp(['Current parameters: C = ', num2str(C(J1)), ', T = ', num2str(T(J2)), ', A = ', num2str(A(J3))])
-
+disp(['The highest purity is p = ', num2str(maxPur), ' with the constants C = ', num2str(C(CIndex)), ' 1/cm, T = ', num2str(T(TIndex)), 'ps and A = ', num2str(A(AIndex)), 'kW'])
 
 %% Timer
 

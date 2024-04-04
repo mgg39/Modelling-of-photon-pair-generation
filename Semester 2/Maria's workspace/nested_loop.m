@@ -161,7 +161,7 @@ for J1=1:I1   %Nested for loop over values of C
 %% Purity
             disp(['Current parameters: C = ', num2str(C(J1)), ', T = ', num2str(T(J2)), ', A = ', num2str(A(J3))]);
 
-            j = 1;
+            j  b  = 1;
 
             svdamp = svds(trap, j);
             prob = (svdamp).^2 / ((svdamp)' * (svdamp));
