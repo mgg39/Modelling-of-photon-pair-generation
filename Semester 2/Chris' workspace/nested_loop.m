@@ -6,15 +6,15 @@ tic;  %Start of timer
 
 %% Variales to tune
 
-lambda = 750*10^-9;  %Wavelength of P photons
+%lambda = 750*10^-9;  %Wavelength of P photons
 
-I1 = 10; %Number of C varialbes being tested
-I2 = 10; %Number of T variables being tested
-I3 = 1; %Number of A variables being tested 
+I1 = 5; %Number of C varialbes being tested
+I2 = 3; %Number of T variables being tested
+I3 = 10; %Number of lambda variables being tested 
 
-C = linspace(0.1, 2.5, I1);  %Range of C values to test
-T = linspace(500, 2500, I2); %Range of T values to test
-A = linspace(0.1, 3.2, I3);  %Range of A values to test
+C = linspace(0.5, 1.5, I1);  %Range of C values to test
+T = linspace(1000, 2500, I2); %Range of T values to test
+lambda = linspace(730, 760, I3)*10^-9;  %Range of A values to test
 
 Purity = zeros(I1, I2, I3);  %Empty 3d array for purity values
 
@@ -38,9 +38,12 @@ u0=zeros(3*N, 1); %Defining an array to represent all pulses together
                   %F pulse represented by first N points, S represented by
                   %N+1 to 2N point, P represented by 2N+1 to 3N points
 
+A = 1;                              %max amplitude of pulse F
 pulsewidth = 20;                    %Pulse width of laser (timeframe already scale to ps with constants)
 ratio = 2*asech(1/2)/pulsewidth;     %Finding the ratio between the desired pulsewidth and FWHM of a sech curve to scale t by
 
+u0(1:N) = sqrt(A)*sech(t*ratio); %*(1+1i)/sqrt(2);
+            %Other pulses remain at 0 for initial conditions
 
 opts = odeset('RelTol',1e-4,'AbsTol',1e-6);  %Setting the tolerance for ode45
 
@@ -52,8 +55,18 @@ theta = 70;    %Slant of waveguide wall in degrees
 
 face = w*h + h^2/tan(theta); %Area of waveguide face in cm^2
 
+%Integral of a*sech(b*x) from -ininifty to infinity= a*pi/b
+E = sqrt(A)*pi/(ratio*10^12);
+
+max_PW = 2*asech(1/2)*D_T*face/(pi*sqrt(A(J3))*10^-12);    
+            %Maximum allowed pulsewidth for selected pulse strength without damaging crystal
 max_PA = (D_T*face*ratio*10^12/pi)^2;  %Maximum allowed pulse strength for selected pulsewidth without damaging crystal
 
+if ((E/face) > D_T) %Recommended changes to not breach damage threshold
+    fprintf("The input laser has exceeded the damage threshold of Lithium Niobate \n")
+    fprintf("Try changing the pulsewidth to be less than %.3f ps or the pulse strength to be less than %.3f kW \n", max_PW, max_PA)
+    stop
+end
 
 load("photon_disp.mat"); %Data for singal and idler photons
 lscan_photon = lamscan; neff_photon=neff;   
@@ -65,36 +78,20 @@ lscan_pump=lscan_pump*10^-6;   %Converting from um to m
 wscan_photon=2*pi*c0./(lscan_photon);
 wscan_pump=2*pi*c0./(lscan_pump); 
 
+load('p_con_curve.mat');
+m_prime = -0.5185;
 
 for J1=1:I1   %Nested for loop over values of C
     for J2=1:I2   %Nested for loop over values of T
         for J3=1:I3   %Nested for loop over values of A
 
-            w0=2*pi*c0/lambda;
+            w0=2*pi*c0/lambda(J3);
 
             dt = T(J2)/N; 
             t = [-T(J2)/2 : dt : T(J2)/2 - dt]'; % time domain in ps (ps determined by constants)
 
             delta = (2 * pi / T(J2)) * [-N/2 : 1 : N/2 - 1]';  %Inverse time domain
             delta = fftshift(delta);
-
-%% Initial conditions
-            u0(1:N) = sqrt(A(J3))*sech(t*ratio); %*(1+1i)/sqrt(2);
-            %Other pulses remain at 0 for initial conditions
- 
-%% Damage threshold
-
-            %Integral of a*sech(b*x) from -ininifty to infinity= a*pi/b
-            E = sqrt(A(J3))*pi/(ratio*10^12);
-
-            max_PW = 2*asech(1/2)*D_T*face/(pi*sqrt(A(J3))*10^-12);    
-            %Maximum allowed pulsewidth for selected pulse strength without damaging crystal
-
-            if ((E/face) > D_T) %Recommended changes to not breach damage threshold
-                fprintf("The input laser has exceeded the damage threshold of Lithium Niobate \n")
-                fprintf("Try changing the pulsewidth to be less than %.3f ps or the pulse strength to be less than %.3f kW \n", max_PW, max_PA)
-                stop
-            end
 
 %% Fourier Frequency domain
 
@@ -125,11 +122,20 @@ for J1=1:I1   %Nested for loop over values of C
             %fprintf("For an input laser of power %.2f kW and pulsewidth %.1d ps, the Pump pulse has a maximum amplitude of %.2d kW at z = %.2d cm and t = %.1d ps\n", A(J3), pulsewidth, Pmax, Zmax, Tmax)
       
 %% 
+            delta_omega = 2*pi*c0*((1/(lambda(J3))) - (1/(750*10^-9)));
 
-            w_span = 3*N*10^12/(2*T(J2)*sqrt(2));
+            for I=1:5
+                x_prime = 1.3553*10^15 + delta_omega/(2*sqrt(2*(1+m_prime^2))*sin(pi/4 - abs(atan(m_prime))));
+                m_prime = spline(Xm, M, x_prime);
+            end
 
-            wi = linspace(1.1562e15-w_span, 1.1562e15+w_span, N); %Setting range of omega for idler photons
-            ws = linspace(1.3553e15-w_span, 1.3553e15+w_span, N); %Setting range of omega for signal photons
+            w_centre_x = 1.3553*10^15 + delta_omega/(sqrt(2*(1+m_prime^2))*sin(pi/4 - abs(atan(m_prime))));
+            w_centre_y = 1.1562*10^15 + m_prime*delta_omega/(sqrt(2*(1+m_prime^2))*sin(pi/4 - abs(atan(m_prime))));
+
+            w_span = 2*N*10^12/(T(J2)*sqrt(2));
+
+            wi = linspace(w_centre_x-w_span, w_centre_x+w_span, N); %Setting range of omega for idler photons
+            ws = linspace(w_centre_y-w_span, w_centre_y+w_span, N); %Setting range of omega for signal photons
 
             ns=spline(wscan_photon,neff_photon,ws);  %using spline to get range of neff that follow same relation between neff_photon and wscan_photon
             ni=spline(wscan_photon,neff_photon,wi);  
@@ -184,9 +190,9 @@ for J1=1:I1   %Nested for loop over values of C
 end
 
 [maxPur, Index] = max(Purity(:));  %Finding the highest purity
-[CIndex, TIndex, AIndex] = ind2sub(size(Purity), Index); %Finding the parameters corresponding to highest purity
+[CIndex, TIndex, LIndex] = ind2sub(size(Purity), Index); %Finding the parameters corresponding to highest purity
 
-disp('The highest purity is p = ', num2str(maxPur), ' with the constants C = ', num2str(C(CIndex)), ' 1/cm, T = ', num2str(T(TIndex)), 'ps and A = ', num2str(A(AIndex)), 'kW')
+disp('The highest purity is p = ', num2str(maxPur), ' with the constants C = ', num2str(C(CIndex)), ' 1/cm, T = ', num2str(T(TIndex)), 'ps and lambda = ', num2str(lambda(LIndex)), 'nm')
 
 %% Timer
 

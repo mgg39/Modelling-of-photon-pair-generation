@@ -6,10 +6,10 @@ tic;  %Start of timer
 
 %% Variales to tune
 
-T = 500; % time domain width
-C = 0.7; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
+T = 1500; % time domain width
+C = 0.9; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
 A = 1; %Amplitude of laser pulse in kiloWatts (kW scaled by constants)
-lambda = 749*10^-9;  %Wavelength of P photons
+lambda = 728*10^-9;  %Wavelength of P photons
 
 PLOT = true;
 
@@ -222,10 +222,23 @@ lscan_pump=lscan_pump*10^-6;   %Converting from um to m
 
 %% Creating meshgrids
 
+load('p_con_curve.mat');
+
+m_prime = -0.5185;
+delta_omega = 2*pi*c0*((1/(lambda)) - (1/(750*10^-9)));
+
+for I=1:5
+    x_prime = 1.3553*10^15 + delta_omega/(2*sqrt(2*(1+m_prime^2))*sin(pi/4 - abs(atan(m_prime))));
+    m_prime = spline(Xm, M, x_prime);
+end
+
+w_centre_x = 1.3553*10^15 + delta_omega/(sqrt(2*(1+m_prime^2))*sin(pi/4 - abs(atan(m_prime))));
+w_centre_y = 1.1562*10^15 + m_prime*delta_omega/(sqrt(2*(1+m_prime^2))*sin(pi/4 - abs(atan(m_prime))));
+
 w_span = 2*N*10^12/(T*sqrt(2));
 
-wi = linspace(1.1562e15-w_span, 1.1562e15+w_span, N); %Setting range of omega for idler photons
-ws = linspace(1.3553e15-w_span, 1.3553e15+w_span, N); %Setting range of omega for signal photons
+wi = linspace(w_centre_x-w_span, w_centre_x+w_span, N); %Setting range of omega for idler photons
+ws = linspace(w_centre_y-w_span, w_centre_y+w_span, N); %Setting range of omega for signal photons
 
 wscan_photon=2*pi*c0./(lscan_photon);
 
