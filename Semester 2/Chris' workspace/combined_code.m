@@ -6,12 +6,12 @@ tic;  %Start of timer
 
 %% Variales to tune
 
-T = 1500; % time domain width
-C = 0.9; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
-A = 1; %Amplitude of laser pulse in kiloWatts (kW scaled by constants)
-lambda = 728*10^-9;  %Wavelength of P photons
+pulsewidth = 10;
+C = 1; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
+A = 0.1; %Amplitude of laser pulse in kiloWatts (kW scaled by constants)
+lambda = 730*10^-9;  %Wavelength of P photons
 
-PLOT = true;
+PLOT = false;
 
 %% Constants
 Beta_f2 = 0.83e-2; %Units in ps^2/cm
@@ -26,9 +26,9 @@ gamma = 10^1.5; %Units in 1/(cm*sqrt(kW))
 
 c0 = 299792458; %Speed of light
 
-
 w0=2*pi*c0/lambda;
 
+T = 1500;
 N = 2048; % N discretization points
 dt = T/N; 
 t = [-T/2 : dt : T/2 - dt]'; % time domain in ps (ps determined by constants)
@@ -42,7 +42,6 @@ u0=zeros(3*N, 1); %Defining an array to represent all pulses together
                   %F pulse represented by first N points, S represented by
                   %N+1 to 2N point, P represented by 2N+1 to 3N points
 
-pulsewidth = 20;                    %Pulse width of laser (timeframe already scale to ps with constants)
 ratio = 2*asech(1/2)/pulsewidth;     %Finding the ratio between the desired pulsewidth and FWHM of a sech curve to scale t by
 
 u0(1:N) = sqrt(A)*sech(t*ratio); %*(1+1i)/sqrt(2);
@@ -282,7 +281,6 @@ if (PLOT==true)
     xlabel('\omega_s (Hz)');
     ylabel('\omega_i (Hz)');
     title('JSI');
-    colorbar
 end
 
 %% Purity
