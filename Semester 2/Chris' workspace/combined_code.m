@@ -6,12 +6,12 @@ tic;  %Start of timer
 
 %% Variales to tune
 
-pulsewidth = 10;
+pulsewidth = 25;
 C = 1; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
-A = 0.1; %Amplitude of laser pulse in kiloWatts (kW scaled by constants)
-lambda = 730*10^-9;  %Wavelength of P photons
+A = 1; %Amplitude of laser pulse in kiloWatts (kW scaled by constants)
+lambda = 750*10^-9;  %Wavelength of P photons
 
-PLOT = false;
+PLOT = true;
 
 %% Constants
 Beta_f2 = 0.83e-2; %Units in ps^2/cm
@@ -94,13 +94,11 @@ if (PLOT == true)
     hold on
     %plot(Beta_f1*z, z, 'k-', Beta_s1*z, z, 'k--')
     hold off
-    xlabel('t(ps)')
+    xlabel('t(ps)', "fontSize", 12)
     xlim([-t_span*3/4 t_span*5/4])
-    ylabel('z(cm)')
-    colorbar
-    %caxis([0 1])
-    ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
-    title("F")
+    ylabel('z(cm)', "fontSize", 12)
+    ylabel(colorbar, "Pulse intensity (kW)","fontsize",12,"rotation",270,"position",[3.5 0.5])
+    title("F", "fontsize", 15)
     set(gca,'TickDir','out'); 
 
     subplot(1,3,2)         %Plotting S pulse propagation
@@ -109,12 +107,11 @@ if (PLOT == true)
     hold on
     %plot(Beta_f1*z, z, 'w-', Beta_s1*z, z, 'w--')
     hold off
-    xlabel('t(ps)')
+    xlabel('t(ps)', "fontSize", 12)
     xlim([-t_span*3/4 t_span*5/4])
-    ylabel('z(cm)')
-    colorbar
-    ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
-    title("S")
+    ylabel('z(cm)', "fontSize", 12)
+    ylabel(colorbar, "Pulse intensity (kW)","fontsize",12,"rotation",270,"position",[3.5 0.5])
+    title("S", "fontsize", 15)
     set(gca,'TickDir','out'); 
 
     subplot(1,3,3)          %Plotting P pulse propagation
@@ -123,12 +120,11 @@ if (PLOT == true)
     hold on
     %plot(Beta_f1*z, z, 'w-', Beta_s1*z, z, 'w--')
     hold off
-    xlabel('t(ps)')
+    xlabel('t(ps)', "fontSize", 12)
     xlim([-t_span*3/4 t_span*5/4])
-    ylabel('z(cm)')
-    colorbar
-    ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
-    title("P")
+    ylabel('z(cm)', "fontSize", 12)
+    ylabel(colorbar, "Pulse intensity (kW)","fontsize",12,"rotation",270,"position",[3.5 0.5])
+    title("P", "fontsize", 15)
     set(gca,'TickDir','out'); 
 end
 
@@ -149,42 +145,39 @@ if (PLOT == true)
     pcolor(freqs,z,abs(P_shift).^2)   %Plotting the FT(P) pulse
     shading interp
     hold on
-    xline(w0, 'w--')   %Plotting a vertical line at w_0 to observe the offset of the frequencies
+    %xline(w0, 'w--')   %Plotting a vertical line at w_0 to observe the offset of the frequencies
     hold off
-    xlabel('\omega (Hz)')
+    xlabel('\omega (Hz)', "fontsize", 12)
     xlim([w0-freqs_range w0+freqs_range])
-    ylabel('z (cm)')
-    colorbar
-    ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
-    title("P(z, \omega)")
+    ylabel('z (cm)', "fontsize", 12)
+    ylabel(colorbar, "Pulse intensity (kW)","fontsize",12,"rotation",270,"position",[3.5 0.5])
+    title("P(z, \omega)", "fontsize", 15)
     set(gca,'TickDir','out'); 
 
     subplot(1,3,2)
     pcolor(freqs,z,real(P_shift))   %Plotting the RE[FT(P)] pulse
     shading interp
     hold on
-    xline(w0, 'w--')   %Plotting a vertical line at 0 to observe the offset of teh frequencies
+    %xline(w0, 'w--')   %Plotting a vertical line at 0 to observe the offset of teh frequencies
     hold off
-    xlabel('\omega (Hz)')
+    xlabel('\omega (Hz)', "fontsize", 12)
     xlim([w0-freqs_range w0+freqs_range])
-    ylabel('z (cm)')
-    colorbar
-    ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
-    title("Re[P(z, \omega)]")
+    ylabel('z (cm)', "fontsize", 12)
+    ylabel(colorbar, "Pulse intensity (kW)","fontsize",12,"rotation",270,"position",[3.5 0.5])
+    title("Re[P(z, \omega)]", "fontsize", 15)
     set(gca,'TickDir','out'); 
 
     subplot(1,3,3)
     pcolor(freqs,z,imag(P_shift))   %Plotting the Im[FT(P)] pulse
     shading interp
     hold on
-    xline(w0, 'w--')   %Plotting a vertical line at 0 to observe the offset of teh frequencies
+    %xline(w0, 'w--')   %Plotting a vertical line at 0 to observe the offset of teh frequencies
     hold off
-    xlabel('\omega (Hz)')
+    xlabel('\omega (Hz)', "fontsize", 12)
     xlim([w0-freqs_range w0+freqs_range])
-    ylabel('z (cm)')
-    colorbar
-    ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
-    title("Im[P(z, \omega)]")
+    ylabel('z (cm)', "fontsize", 12)
+    ylabel(colorbar, "Pulse intensity (kW)","fontsize",12,"rotation",270,"position",[3.5 0.5])
+    title("Im[P(z, \omega)]", "fontsize", 15)
     set(gca,'TickDir','out'); 
 end
 
@@ -271,16 +264,19 @@ for c=1:N-1
     trap = trap + interp1(freqs, interp1(z, P_shift, dz*c), Wp).*exp(1i*delta_beta.*dz*c)*dz; 
 end
 
+%% 
+
+
 if (PLOT==true)
     figure
     pcolor(Wi,Ws,abs(trap).^2);
     shading interp;
     hold on
-    plot(ws, w0-ws, 'w--')
+    %plot(ws, w0-ws, 'w--')
     hold off
-    xlabel('\omega_s (Hz)');
-    ylabel('\omega_i (Hz)');
-    title('JSI');
+    xlabel('\omega_s (Hz)', "fontsize", 12);
+    ylabel('\omega_i (Hz)', "fontsize", 12);
+    title('JSI', "fontsize", 15);
 end
 
 %% Purity
