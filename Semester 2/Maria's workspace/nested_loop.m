@@ -6,7 +6,7 @@ tic;  %Start of timer
 
 %% Variales to tune
 
-lambda = 750*10^-9;  %Wavelength of P photons
+lambda = 577*10^-9;  %Wavelength of P photons %CHANGE: 750->577
 
 I1 = 10; %Number of C varialbes being tested
 I2 = 10; %Number of T variables being tested
@@ -161,7 +161,7 @@ for J1=1:I1   %Nested for loop over values of C
 %% Purity
             disp(['Current parameters: C = ', num2str(C(J1)), ', T = ', num2str(T(J2)), ', A = ', num2str(A(J3))]);
 
-            j  b  = 1;
+            j = 1;
 
             svdamp = svds(trap, j);
             prob = (svdamp).^2 / ((svdamp)' * (svdamp));
