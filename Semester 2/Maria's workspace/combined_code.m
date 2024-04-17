@@ -6,10 +6,10 @@ tic;  %Start of timer
 
 %% Variales to tune
 
-T = 500; % time domain width
-C = 0.7; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
-A = 1; %Amplitude of laser pulse in kiloWatts (kW scaled by constants)
-lambda = 749*10^-9;  %Wavelength of P photons
+pulsewidth = 30;
+C = 0.8; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
+A = 0.26; %Amplitude of laser pulse in kiloWatts (kW scaled by constants)
+lambda = 730*10^-9;  %Wavelength of P photons
 
 PLOT = true;
 
@@ -26,9 +26,9 @@ gamma = 10^1.5; %Units in 1/(cm*sqrt(kW))
 
 c0 = 299792458; %Speed of light
 
-
 w0=2*pi*c0/lambda;
 
+T = 1500;
 N = 2048; % N discretization points
 dt = T/N; 
 t = [-T/2 : dt : T/2 - dt]'; % time domain in ps (ps determined by constants)
@@ -42,7 +42,6 @@ u0=zeros(3*N, 1); %Defining an array to represent all pulses together
                   %F pulse represented by first N points, S represented by
                   %N+1 to 2N point, P represented by 2N+1 to 3N points
 
-pulsewidth = 20;                    %Pulse width of laser (timeframe already scale to ps with constants)
 ratio = 2*asech(1/2)/pulsewidth;     %Finding the ratio between the desired pulsewidth and FWHM of a sech curve to scale t by
 
 u0(1:N) = sqrt(A)*sech(t*ratio); %*(1+1i)/sqrt(2);
@@ -202,13 +201,24 @@ fprintf("For an input laser of power %.2f kW and pulsewidth %.1d ps, the Pump pu
 [PmaxWRow,PmaxWCol] = ind2sub(size(abs(P_shift).^2),IdxW);  %Finding the maximum of P(z,omega)
 
 if (PLOT == true)
-    figure
+    figure;
+
     subplot(1,2,1)
-    plot(freqs, real(P_shift(PmaxWRow,:)))   %Plotting real and imaginary parts of P(z,omega) to observe fine structure
+    plot(freqs, real(P_shift(PmaxWRow,:)), 'b-', 'LineWidth', 1.5)   % Real part of P(z,omega)
     xlim([w0-freqs_range w0+freqs_range])
+    xlabel('\omega (Hz)')
+    ylabel('Real part of P(z,\omega)')
+    title('Real part of P(z,\omega) at maximum intensity')
+    grid on
+
     subplot(1,2,2)
-    plot(freqs, imag(P_shift(PmaxWRow,:)))
+    plot(freqs, imag(P_shift(PmaxWRow,:)), 'r-', 'LineWidth', 1.5)   % Imaginary part of P(z,omega)
     xlim([w0-freqs_range w0+freqs_range])
+    xlabel('\omega (Hz)')
+    ylabel('Imaginary part of P(z,\omega)')
+    title('Imaginary part of P(z,\omega) at maximum intensity')
+    grid on
+
 end
 
 %% Loading photon data
@@ -222,10 +232,23 @@ lscan_pump=lscan_pump*10^-6;   %Converting from um to m
 
 %% Creating meshgrids
 
+load('p_con_curve.mat');
+
+m_prime = -0.5185;
+delta_omega = 2*pi*c0*((1/(lambda)) - (1/(750*10^-9)));
+
+for I=1:5
+    x_prime = 1.3553*10^15 + delta_omega/(2*sqrt(2*(1+m_prime^2))*sin(pi/4 - abs(atan(m_prime))));
+    m_prime = spline(Xm, M, x_prime);
+end
+
+w_centre_x = 1.3553*10^15 + delta_omega/(sqrt(2*(1+m_prime^2))*sin(pi/4 - abs(atan(m_prime))));
+w_centre_y = 1.1562*10^15 + m_prime*delta_omega/(sqrt(2*(1+m_prime^2))*sin(pi/4 - abs(atan(m_prime))));
+
 w_span = 2*N*10^12/(T*sqrt(2));
 
-wi = linspace(1.1562e15-w_span, 1.1562e15+w_span, N); %Setting range of omega for idler photons
-ws = linspace(1.3553e15-w_span, 1.3553e15+w_span, N); %Setting range of omega for signal photons
+wi = linspace(w_centre_x-w_span, w_centre_x+w_span, N); %Setting range of omega for idler photons
+ws = linspace(w_centre_y-w_span, w_centre_y+w_span, N); %Setting range of omega for signal photons
 
 wscan_photon=2*pi*c0./(lscan_photon);
 
@@ -269,7 +292,6 @@ if (PLOT==true)
     xlabel('\omega_s (Hz)');
     ylabel('\omega_i (Hz)');
     title('JSI');
-    colorbar
 end
 
 %% Purity
@@ -293,10 +315,11 @@ end
 figure
 plot(p)
 title(['P = ', num2str(p(j)), ', j = ', num2str(j)])
-xlabel('Number of funcitons decomposed into (j)')
+xlabel('Number of functions decomposed into (j)')
 ylabel('Purity')
 xlim([0 j])
 ylim([0 1])
+
 
 %% Timer
 

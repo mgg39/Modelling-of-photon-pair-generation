@@ -201,13 +201,24 @@ fprintf("For an input laser of power %.2f kW and pulsewidth %.1d ps, the Pump pu
 [PmaxWRow,PmaxWCol] = ind2sub(size(abs(P_shift).^2),IdxW);  %Finding the maximum of P(z,omega)
 
 if (PLOT == true)
-    figure
+    figure;
+
     subplot(1,2,1)
-    plot(freqs, real(P_shift(PmaxWRow,:)))   %Plotting real and imaginary parts of P(z,omega) to observe fine structure
+    plot(freqs, real(P_shift(PmaxWRow,:)), 'b-', 'LineWidth', 1.5)   % Real part of P(z,omega)
     xlim([w0-freqs_range w0+freqs_range])
+    xlabel('\omega (Hz)')
+    ylabel('Real part of P(z,\omega)')
+    title('Real part of P(z,\omega) at maximum intensity')
+    grid on
+
     subplot(1,2,2)
-    plot(freqs, imag(P_shift(PmaxWRow,:)))
+    plot(freqs, imag(P_shift(PmaxWRow,:)), 'r-', 'LineWidth', 1.5)   % Imaginary part of P(z,omega)
     xlim([w0-freqs_range w0+freqs_range])
+    xlabel('\omega (Hz)')
+    ylabel('Imaginary part of P(z,\omega)')
+    title('Imaginary part of P(z,\omega) at maximum intensity')
+    grid on
+
 end
 
 %% Loading photon data
@@ -309,9 +320,40 @@ ylabel('Purity')
 xlim([0 j])
 ylim([0 1])
 
+%% Energy plot
+Ef = trapz(t, abs(u1).^2, 2);  % Numerical integration over time for F pulse
+Es = trapz(t, abs(u2).^2, 2);  % Numerical integration over time for S pulse
+Ez = trapz(t, abs(u3).^2, 2);  % Numerical integration over time for P pulse
+
+
+%% Plot
+figure;
+
+subplot(1,3,1)  % Plotting Ef
+plot(z, Ef)
+xlabel('z (cm)')
+ylabel('Energy')
+title('F')
+set(gca,'TickDir','out'); 
+ylim([0 10]);  % y-axis limit to 0-10
+
+subplot(1,3,2)  % Plotting Es
+plot(z, Es)
+xlabel('z (cm)')
+ylabel('Energy')
+title('A')
+set(gca,'TickDir','out'); 
+
+subplot(1,3,3)  % Plotting Ez
+plot(z, Ez)
+xlabel('z (cm)')
+ylabel('Energy')
+title('P')
+set(gca,'TickDir','out'); 
+%}
+
 %% Timer
 
 elapsed_time = toc;
 mins = floor(elapsed_time/60);
 secs = rem(elapsed_time, 60);
-disp(['Elapsed time: ', num2str(mins), ' minutes and ', num2str(secs), ' seconds']);
