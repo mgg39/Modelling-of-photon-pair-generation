@@ -6,9 +6,9 @@ tic;  %Start of timer
 
 %% Variales to tune
 
-pulsewidth = 30;
-C = 0.8; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
-A = 0.26; %Amplitude of laser pulse in kiloWatts (kW scaled by constants)
+pulsewidth = 35;
+C = 1.2; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
+A = 1; %Amplitude of laser pulse in kiloWatts (kW scaled by constants)
 lambda = 730*10^-9;  %Wavelength of P photons
 
 PLOT = true;
@@ -38,13 +38,16 @@ delta = fftshift(delta);
 
 %% Initial conditions
 
+delta_0 = 2*pi*c0/(2*lambda) - 2*pi*c0/(2*750*10^-9);
+
 u0=zeros(3*N, 1); %Defining an array to represent all pulses together
                   %F pulse represented by first N points, S represented by
                   %N+1 to 2N point, P represented by 2N+1 to 3N points
 
 ratio = 2*asech(1/2)/pulsewidth;     %Finding the ratio between the desired pulsewidth and FWHM of a sech curve to scale t by
 
-u0(1:N) = sqrt(A)*sech(t*ratio); %*(1+1i)/sqrt(2);
+u0(1:N) = sech(t*ratio).*exp(-1i*delta_0*t).*sqrt(A); %*(1+1i)/sqrt(2);
+%u0(1:N) = sqrt(A)*sech(t*ratio); %*(1+1i)/sqrt(2)
 
 %Other pulses remain at 0 for initial conditions
 
@@ -265,10 +268,12 @@ delta_beta = Beta_p - Beta_s - Beta_i;  %delta_beta = beta_p - beta_s - beta_i
 zend = zend/100;
 dz = zend/N;
 
-trap = interp1(freqs, interp1(z, P_shift, 0), Wp).*0.5*dz + interp1(freqs, interp1(z, P_shift, zend), Wp).*exp(1i*delta_beta.*zend)*0.5*dz;
+%trap = interp1(freqs, interp1(z, P_shift, 0), Wp).*0.5*dz + interp1(freqs, interp1(z, P_shift, zend), Wp).*exp(1i*delta_beta.*zend)*0.5*dz;
+trap = interp1(freqs, P_shift(PmaxWRow,:), Wp).*0.5*dz + interp1(freqs, P_shift(PmaxWRow,:), Wp).*exp(1i*delta_beta.*zend)*0.5*dz;
 
 for c=1:N-1
-    trap = trap + interp1(freqs, interp1(z, P_shift, dz*c), Wp).*exp(1i*delta_beta.*dz*c)*dz; 
+    %trap = trap + interp1(freqs, interp1(z, P_shift, dz*c), Wp).*exp(1i*delta_beta.*dz*c)*dz; 
+    trap = trap + interp1(freqs, P_shift(PmaxWRow,:), Wp).*exp(1i*delta_beta.*dz*c)*dz; 
 end
 
 if (PLOT==true)
@@ -315,3 +320,51 @@ elapsed_time = toc;
 mins = floor(elapsed_time/60);
 secs = rem(elapsed_time, 60);
 disp(['Elapsed time: ', num2str(mins), ' minutes and ', num2str(secs), ' seconds']);
+
+%% 
+
+if (PLOT == true)
+    figure
+
+    subplot(1,3,1)
+    pcolor(t,z,abs(u3).^2)   %Plotting the FT(P) pulse
+    shading interp
+    hold on
+    %xline(w0, 'w--')   %Plotting a vertical line at w_0 to observe the offset of the frequencies
+    hold off
+    %xlabel('t (ps)')
+    xlim([-t_span*3/4 t_span*5/4])
+    ylabel('z (cm)')
+    colorbar
+    ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
+    title("P(z, t)")
+    set(gca,'TickDir','out'); 
+
+    subplot(1,3,2)
+    pcolor(t,z,real(u3))   %Plotting the RE[FT(P)] pulse
+    shading interp
+    hold on
+    %xline(w0, 'w--')   %Plotting a vertical line at 0 to observe the offset of teh frequencies
+    hold off
+    xlabel('t (ps)')
+    xlim([-t_span*3/4 t_span*5/4])
+    ylabel('z (cm)')
+    colorbar
+    ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
+    title("Re[P(z, t)]")
+    set(gca,'TickDir','out'); 
+
+    subplot(1,3,3)
+    pcolor(t,z,imag(u3))   %Plotting the Im[FT(P)] pulse
+    shading interp
+    hold on
+    %xline(w0, 'w--')   %Plotting a vertical line at 0 to observe the offset of teh frequencies
+    hold off
+    xlabel('t (ps)')
+    xlim([-t_span*3/4 t_span*5/4])
+    ylabel('z (cm)')
+    colorbar
+    ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
+    title("Im[P(z, t)]")
+    set(gca,'TickDir','out'); 
+end
