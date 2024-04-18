@@ -1,0 +1,49 @@
+\begin{table}[H]
+    \centering
+    \begin{tabular}{c|c}
+        \textbf{Value} & \textbf{Name} & \textbf{Value/Range}\\
+        \hline
+        $\epsilon$ & TODO?? \\
+        \hline
+        $\chi_{2}$ & TODO?? \\
+        \hline
+        $F$ & Fundamental Pulse \\
+        \hline
+        $S$ & Second Harmonic Pulse \\
+        \hline
+        $P$ & Pump pulse for Parametric Down Conversion \\
+        \hline
+        $\beta$ & Propagation constant \\
+        \hline
+        $t$ & Time \\
+        \hline
+        $\gamma$ & Non-linear effective strength of the interaction \\
+        \hline
+        $C$ & Coupling strength \\
+        \hline
+        $\kappa$ & Phase mistmatch \\
+        \hline
+        $z$ & Position along the length of the waveguide \\
+        \hline
+        $\ket{\gamma}$ & Wavefunction \\
+        \hline
+        $\omega_{n}$ & Frequency of pulse n \\
+        \hline
+        $\phi(\omega_{s}, \omega_{i})$ & Joint phasematching function \\
+        \hline
+        $p_{2}$ & Non-linear coefficient \\
+        \hline
+        $\alpha(\omega_{s}, \omega_{i})$ & Pump function \\
+        \hline
+        $n_{eff,m}$ & Effective refractive index of photon m in pulse n \\
+        \hline
+        $L$ & Length of the waveguide \\
+        \hline
+        $J$ & Joint spectral amplitude \\
+        \hline
+        $\alpha(\omega_{s}, \omega_{i})$ & Spectrum pump \\
+
+    \end{tabular}
+    \caption{Description of all values mentioned in this report in order of appeareance.}
+    \label{tab:my_label}
+\end{table}
