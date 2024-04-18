@@ -227,7 +227,7 @@ lscan_pump=lscan_pump*10^-6;   %Converting from um to m
 load('p_con_curve.mat');
 
 m_prime = -0.5185;
-delta_omega = 2*pi*c0*((1/(lambda)) - (1/(750*10^-9)));
+delta_omega = 2*pi*c0/(lambda) - 2*pi*c0/(750*10^-9);
 
 for I=1:5
     x_prime = 1.3553*10^15 + delta_omega/(2*sqrt(2*(1+m_prime^2))*sin(pi/4 - abs(atan(m_prime))));
