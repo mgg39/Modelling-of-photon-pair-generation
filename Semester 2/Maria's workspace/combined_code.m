@@ -135,6 +135,46 @@ if (PLOT == true)
     set(gca,'TickDir','out'); 
 end
 
+U1_hat = fft(u1, N, 2); % Fourier transform of F pulse
+U2_hat = fft(u2, N, 2); % Fourier transform of S pulse
+U3_hat = fft(u3, N, 2); % Fourier transform of P pulse
+
+delta = fftshift((2 * pi / T) * linspace(-1, 1, N)); % Adjusting delta values
+
+%{
+%% Energy plot------------------------------------------------------------------------
+Ef = trapz(t, abs(u1).^2, 2);  % Numerical integration over time for F pulse
+Es = trapz(t, abs(u2).^2, 2);  % Numerical integration over time for S pulse
+Ez = trapz(t, abs(u3).^2, 2);  % Numerical integration over time for P pulse
+
+
+%% Plot
+figure;
+
+subplot(1,3,1)  % Plotting Ef
+plot(z, Ef)
+xlabel('z (cm)')
+ylabel('Energy')
+title('F')
+set(gca,'TickDir','out'); 
+ylim([0 10]);  % y-axis limit to 0-10
+
+subplot(1,3,2)  % Plotting Es
+plot(z, Es)
+xlabel('z (cm)')
+ylabel('Energy')
+title('S')
+set(gca,'TickDir','out'); 
+
+subplot(1,3,3)  % Plotting Ez
+plot(z, Ez)
+xlabel('z (cm)')
+ylabel('Energy')
+title('P')
+set(gca,'TickDir','out'); 
+%% Energy plot------------------------------------------------------------------------
+%}
+
 %% Converting P(z, t) to P(z, w)
 
 P = fft(fftshift(u3,2), [], 2);    %Defining a matrix P as the FT of u3 (after shifting u3 to t=0)
