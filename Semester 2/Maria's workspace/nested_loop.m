@@ -77,8 +77,10 @@ for J1=1:I1   %Nested for loop over values of C
 
                 w0=2*pi*c0/lambda(J4);
 
+                delta_0 = 2*pi*c0/(2*lambda(J4)) - 2*pi*c0/(2*750*10^-9);
+
                 ratio = 2*asech(1/2)/pulsewidth(J2);     %Finding the ratio between the desired pulsewidth and FWHM of a sech curve to scale t by
-                u0(1:N) = sqrt(A(J3))*sech(t*ratio); %*(1+1i)/sqrt(2);
+                u0(1:N) = sech(t*ratio).*exp(-1i*delta_0*t).*sqrt(A(J3)); %*(1+1i)/sqrt(2);
 
                 E = sqrt(A(J3))*pi/(ratio*10^12);
                 %Integral of a*sech(b*x) from -ininifty to infinity= a*pi/b
@@ -185,7 +187,7 @@ fprintf("The highest purity is p = %.4f with the constants C = %.2f 1/cm, pulsew
 %% 
  
 save('Purity.mat', 'Purity', 'C', 'pulsewidth', 'A', 'lambda')
-fprintf("!!! \n MAKE SURE YOU AREN'T OVERWRITING OLD PURITY DATA THAT YOU STILL WANT \n THIS IS A WARNING BECAUSE I FORGOT TO DO SO \n !!! \n")
+fprintf("\n !!! \n MAKE SURE YOU AREN'T OVERWRITING OLD PURITY DATA THAT YOU STILL WANT \n THIS IS A WARNING BECAUSE I FORGOT TO DO SO \n !!! \n")
 
 %% Timer
 

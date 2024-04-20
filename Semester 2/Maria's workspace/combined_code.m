@@ -6,10 +6,10 @@ tic;  %Start of timer
 
 %% Variales to tune
 
-pulsewidth = 30;
-C = 0.8; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
-A = 0.26; %Amplitude of laser pulse in kiloWatts (kW scaled by constants)
-lambda = 730*10^-9;  %Wavelength of P photons
+pulsewidth = 35;
+C = 1.2; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
+A = 1; %Amplitude of laser pulse in kiloWatts (kW scaled by constants)
+lambda = 752*10^-9;  %Wavelength of P photons
 
 PLOT = true;
 
@@ -38,20 +38,23 @@ delta = fftshift(delta);
 
 %% Initial conditions
 
+delta_0 = 2*pi*c0/(2*lambda) - 2*pi*c0/(2*750*10^-9);
+
 u0=zeros(3*N, 1); %Defining an array to represent all pulses together
                   %F pulse represented by first N points, S represented by
                   %N+1 to 2N point, P represented by 2N+1 to 3N points
 
 ratio = 2*asech(1/2)/pulsewidth;     %Finding the ratio between the desired pulsewidth and FWHM of a sech curve to scale t by
 
-u0(1:N) = sqrt(A)*sech(t*ratio); %*(1+1i)/sqrt(2);
+u0(1:N) = sech(t*ratio).*exp(-1i*delta_0*t).*sqrt(A); %*(1+1i)/sqrt(2);
+%u0(1:N) = sqrt(A)*sech(t*ratio); %*(1+1i)/sqrt(2)
 
 %Other pulses remain at 0 for initial conditions
 
 opts = odeset('RelTol',1e-4,'AbsTol',1e-6);
  
 %% Damage threshold
-D_T = 14e-3;  %Damage threshold of LiNbO3, units of kJ/cm^2
+D_T = 14e-3;   %Damage threshold of LiNbO3, units of kJ/cm^2
 w = 664e-7;    %Width of waveguide in cm
 h = 330e-7;    %Height of waveguide in cm
 theta = 70;    %Slant of waveguide wall in degrees
@@ -201,24 +204,13 @@ fprintf("For an input laser of power %.2f kW and pulsewidth %.1d ps, the Pump pu
 [PmaxWRow,PmaxWCol] = ind2sub(size(abs(P_shift).^2),IdxW);  %Finding the maximum of P(z,omega)
 
 if (PLOT == true)
-    figure;
-
+    figure
     subplot(1,2,1)
-    plot(freqs, real(P_shift(PmaxWRow,:)), 'b-', 'LineWidth', 1.5)   % Real part of P(z,omega)
+    plot(freqs, real(P_shift(PmaxWRow,:)))   %Plotting real and imaginary parts of P(z,omega) to observe fine structure
     xlim([w0-freqs_range w0+freqs_range])
-    xlabel('\omega (Hz)')
-    ylabel('Real part of P(z,\omega)')
-    title('Real part of P(z,\omega) at maximum intensity')
-    grid on
-
     subplot(1,2,2)
-    plot(freqs, imag(P_shift(PmaxWRow,:)), 'r-', 'LineWidth', 1.5)   % Imaginary part of P(z,omega)
+    plot(freqs, imag(P_shift(PmaxWRow,:)))
     xlim([w0-freqs_range w0+freqs_range])
-    xlabel('\omega (Hz)')
-    ylabel('Imaginary part of P(z,\omega)')
-    title('Imaginary part of P(z,\omega) at maximum intensity')
-    grid on
-
 end
 
 %% Loading photon data
@@ -235,7 +227,7 @@ lscan_pump=lscan_pump*10^-6;   %Converting from um to m
 load('p_con_curve.mat');
 
 m_prime = -0.5185;
-delta_omega = 2*pi*c0*((1/(lambda)) - (1/(750*10^-9)));
+delta_omega = 2*pi*c0/(lambda) - 2*pi*c0/(750*10^-9);
 
 for I=1:5
     x_prime = 1.3553*10^15 + delta_omega/(2*sqrt(2*(1+m_prime^2))*sin(pi/4 - abs(atan(m_prime))));
@@ -276,10 +268,12 @@ delta_beta = Beta_p - Beta_s - Beta_i;  %delta_beta = beta_p - beta_s - beta_i
 zend = zend/100;
 dz = zend/N;
 
-trap = interp1(freqs, interp1(z, P_shift, 0), Wp).*0.5*dz + interp1(freqs, interp1(z, P_shift, zend), Wp).*exp(1i*delta_beta.*zend)*0.5*dz;
+%trap = interp1(freqs, interp1(z, P_shift, 0), Wp).*0.5*dz + interp1(freqs, interp1(z, P_shift, zend), Wp).*exp(1i*delta_beta.*zend)*0.5*dz;
+trap = interp1(freqs, P_shift(PmaxWRow,:), Wp).*0.5*dz + interp1(freqs, P_shift(PmaxWRow,:), Wp).*exp(1i*delta_beta.*zend)*0.5*dz;
 
 for c=1:N-1
-    trap = trap + interp1(freqs, interp1(z, P_shift, dz*c), Wp).*exp(1i*delta_beta.*dz*c)*dz; 
+    %trap = trap + interp1(freqs, interp1(z, P_shift, dz*c), Wp).*exp(1i*delta_beta.*dz*c)*dz; 
+    trap = trap + interp1(freqs, P_shift(PmaxWRow,:), Wp).*exp(1i*delta_beta.*dz*c)*dz; 
 end
 
 if (PLOT==true)
@@ -291,7 +285,7 @@ if (PLOT==true)
     hold off
     xlabel('\omega_s (Hz)');
     ylabel('\omega_i (Hz)');
-    title('JSI');
+    %title('JSI');
 end
 
 %% Purity
@@ -315,11 +309,10 @@ end
 figure
 plot(p)
 title(['P = ', num2str(p(j)), ', j = ', num2str(j)])
-xlabel('Number of functions decomposed into (j)')
+xlabel('Number of funcitons decomposed into (j)')
 ylabel('Purity')
 xlim([0 j])
 ylim([0 1])
-
 
 %% Timer
 
@@ -327,3 +320,51 @@ elapsed_time = toc;
 mins = floor(elapsed_time/60);
 secs = rem(elapsed_time, 60);
 disp(['Elapsed time: ', num2str(mins), ' minutes and ', num2str(secs), ' seconds']);
+
+%% 
+
+if (PLOT == true)
+    figure
+
+    subplot(1,3,1)
+    pcolor(t,z,abs(u3).^2)   %Plotting the FT(P) pulse
+    shading interp
+    hold on
+    %xline(w0, 'w--')   %Plotting a vertical line at w_0 to observe the offset of the frequencies
+    hold off
+    %xlabel('t (ps)')
+    xlim([-t_span*3/4 t_span*5/4])
+    ylabel('z (cm)')
+    colorbar
+    ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
+    title("P(z, t)")
+    set(gca,'TickDir','out'); 
+
+    subplot(1,3,2)
+    pcolor(t,z,real(u3))   %Plotting the RE[FT(P)] pulse
+    shading interp
+    hold on
+    %xline(w0, 'w--')   %Plotting a vertical line at 0 to observe the offset of teh frequencies
+    hold off
+    xlabel('t (ps)')
+    xlim([-t_span*3/4 t_span*5/4])
+    ylabel('z (cm)')
+    colorbar
+    ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
+    title("Re[P(z, t)]")
+    set(gca,'TickDir','out'); 
+
+    subplot(1,3,3)
+    pcolor(t,z,imag(u3))   %Plotting the Im[FT(P)] pulse
+    shading interp
+    hold on
+    %xline(w0, 'w--')   %Plotting a vertical line at 0 to observe the offset of teh frequencies
+    hold off
+    xlabel('t (ps)')
+    xlim([-t_span*3/4 t_span*5/4])
+    ylabel('z (cm)')
+    colorbar
+    ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
+    title("Im[P(z, t)]")
+    set(gca,'TickDir','out'); 
+end
