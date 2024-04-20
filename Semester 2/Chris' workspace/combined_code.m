@@ -6,10 +6,10 @@ tic;  %Start of timer
 
 %% Variales to tune
 
-pulsewidth = 35;
-C = 1.2; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
+pulsewidth = 25;
+C = 1; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
 A = 1; %Amplitude of laser pulse in kiloWatts (kW scaled by constants)
-lambda = 730*10^-9;  %Wavelength of P photons
+lambda = 740*10^-9;  %Wavelength of P photons
 
 PLOT = true;
 
@@ -46,7 +46,7 @@ u0=zeros(3*N, 1); %Defining an array to represent all pulses together
 
 ratio = 2*asech(1/2)/pulsewidth;     %Finding the ratio between the desired pulsewidth and FWHM of a sech curve to scale t by
 
-u0(1:N) = sech(t*ratio).*exp(-1i*delta_0*t).*sqrt(A); %*(1+1i)/sqrt(2);
+u0(1:N) = sech(t*ratio).*exp(-1i*delta_0*t*10^-12).*sqrt(A); %*(1+1i)/sqrt(2);
 %u0(1:N) = sqrt(A)*sech(t*ratio); %*(1+1i)/sqrt(2)
 
 %Other pulses remain at 0 for initial conditions
@@ -321,50 +321,4 @@ mins = floor(elapsed_time/60);
 secs = rem(elapsed_time, 60);
 disp(['Elapsed time: ', num2str(mins), ' minutes and ', num2str(secs), ' seconds']);
 
-%% 
 
-if (PLOT == true)
-    figure
-
-    subplot(1,3,1)
-    pcolor(t,z,abs(u3).^2)   %Plotting the FT(P) pulse
-    shading interp
-    hold on
-    %xline(w0, 'w--')   %Plotting a vertical line at w_0 to observe the offset of the frequencies
-    hold off
-    %xlabel('t (ps)')
-    xlim([-t_span*3/4 t_span*5/4])
-    ylabel('z (cm)')
-    colorbar
-    ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
-    title("P(z, t)")
-    set(gca,'TickDir','out'); 
-
-    subplot(1,3,2)
-    pcolor(t,z,real(u3))   %Plotting the RE[FT(P)] pulse
-    shading interp
-    hold on
-    %xline(w0, 'w--')   %Plotting a vertical line at 0 to observe the offset of teh frequencies
-    hold off
-    xlabel('t (ps)')
-    xlim([-t_span*3/4 t_span*5/4])
-    ylabel('z (cm)')
-    colorbar
-    ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
-    title("Re[P(z, t)]")
-    set(gca,'TickDir','out'); 
-
-    subplot(1,3,3)
-    pcolor(t,z,imag(u3))   %Plotting the Im[FT(P)] pulse
-    shading interp
-    hold on
-    %xline(w0, 'w--')   %Plotting a vertical line at 0 to observe the offset of teh frequencies
-    hold off
-    xlabel('t (ps)')
-    xlim([-t_span*3/4 t_span*5/4])
-    ylabel('z (cm)')
-    colorbar
-    ylabel(colorbar, "Pulse intensity (kW)","fontsize",10,"rotation",270)
-    title("Im[P(z, t)]")
-    set(gca,'TickDir','out'); 
-end
