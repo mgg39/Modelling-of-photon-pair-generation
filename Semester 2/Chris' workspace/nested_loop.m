@@ -80,7 +80,8 @@ for J1=1:I1   %Nested for loop over values of C
                 delta_0 = 2*pi*c0/(2*lambda(J4)) - 2*pi*c0/(2*750*10^-9);
 
                 ratio = 2*asech(1/2)/pulsewidth(J2);     %Finding the ratio between the desired pulsewidth and FWHM of a sech curve to scale t by
-                u0(1:N) = sech(t*ratio).*exp(-1i*delta_0*t).*sqrt(A(J3)); %*(1+1i)/sqrt(2);
+                %u0(1:N) = sech(t*ratio).*exp(-1i*delta_0*t).*sqrt(A(J3)); %*(1+1i)/sqrt(2);
+                u0(1:N) = sech(t*ratio).*sqrt(A(J3)); %*(1+1i)/sqrt(2);
 
                 E = sqrt(A(J3))*pi/(ratio*10^12);
                 %Integral of a*sech(b*x) from -ininifty to infinity= a*pi/b

@@ -6,8 +6,8 @@ tic;  %Start of timer
 
 %% Variales to tune
 
-pulsewidth = 25;
-C = 1; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
+pulsewidth = 35;
+C = 1.2; %Units in  1/cm, C=2 corresponds to a rail seperation of x=200nm  
 A = 1; %Amplitude of laser pulse in kiloWatts (kW scaled by constants)
 lambda = 740*10^-9;  %Wavelength of P photons
 
@@ -46,8 +46,8 @@ u0=zeros(3*N, 1); %Defining an array to represent all pulses together
 
 ratio = 2*asech(1/2)/pulsewidth;     %Finding the ratio between the desired pulsewidth and FWHM of a sech curve to scale t by
 
-u0(1:N) = sech(t*ratio).*exp(-1i*delta_0*t*10^-12).*sqrt(A); %*(1+1i)/sqrt(2);
-%u0(1:N) = sqrt(A)*sech(t*ratio); %*(1+1i)/sqrt(2)
+%u0(1:N) = sech(t*ratio).*exp(-1i*delta_0*t*10^-12).*sqrt(A); %*(1+1i)/sqrt(2);
+u0(1:N) = sqrt(A)*sech(t*ratio)*(1+1i)/sqrt(2)
 
 %Other pulses remain at 0 for initial conditions
 
