@@ -10,3 +10,4 @@ xlabel('\tau / ps')
 ylabel('C / m^{-1}')
 title('A = 0.1kW, \lambda_F = 1.5\mu m')
 colorbar
+caxis([0 0.2836])
