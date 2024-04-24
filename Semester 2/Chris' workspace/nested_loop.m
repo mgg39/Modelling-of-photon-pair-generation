@@ -6,15 +6,15 @@ tic;  %Start of timer
 
 %% Variales to tune
 
-I1 = 4; %Number of C varialbes being tested
-I2 = 5; %Number of pw variables being tested
-I3 = 3; %Number of A values being tested
-I4 = 5; %Number of lambda variables being tested 
+I1 = 10; %Number of C varialbes being tested
+I2 = 10; %Number of pw variables being tested
+I3 = 1; %Number of A values being tested
+I4 = 1; %Number of lambda variables being tested 
 
 C = linspace(0.7, 1.2, I1);  %Range of C values to test
-pulsewidth = linspace(10, 70, I2); %Range of pw values to test
-A = linspace(0.1, 1, I3); %Range of A values being tested
-lambda = linspace(725, 755, I4)*10^-9;  %Range of lambda values to test
+pulsewidth = linspace(10, 100, I2); %Range of pw values to test
+A = linspace(0.1, 0.1, I3); %Range of A values being tested
+lambda = linspace(750, 750, I4)*10^-9;  %Range of lambda values to test
 
 Purity = zeros(I1, I2, I3, I4);  %Empty 4d array for purity values
 
